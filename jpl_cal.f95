@@ -11,6 +11,7 @@
 ! 引数: JST（日本標準時）
 !       * 書式：YYYYMMDD
 !       * 無指定なら現在(システム日時)と判断。
+!       * 西暦 1900年〜2099年まで対応
 !****************************************************
 !
 program jpl_cal
@@ -148,7 +149,7 @@ contains
     else
       call getarg(1, gc)
       if (len(trim(gc)) /= 8) then
-        print *, "Format: YYYYMMDD"
+        print *, "*** Format must be 'YYYYMMDD'"
         stat = .false.
         return
       end if
@@ -157,7 +158,11 @@ contains
 
     ! 日付の整合性チェック
     if (.not. is_valid_date(jst)) then
-      print *, "Invalid date!"
+      print *, "*** Date is invalid!"
+      stat = .false.
+    end if
+    if (jst%year < Y_MIN .or. jst%year > Y_MAX) then
+      print *, "*** Year must be from 1900 to 2099!"
       stat = .false.
     end if
   end subroutine get_arg
