@@ -58,8 +58,8 @@ program nutation_model
   stop
 contains
   ! コマンドライン引数取得
-  ! * YYYYMMDDHHMMSS 形式
-  ! * 14桁超入力された場合は、15桁目以降の部分は切り捨てる
+  ! * YYYYMMDDHHMMSSUUUUUU 形式
+  ! * 20桁超入力された場合は、21桁目以降の部分は切り捨てる
   ! * コマンドライン引数がなければ、システム日付を TT とする
   ! * 日時の整合性チェックは行わない
   !
@@ -76,8 +76,8 @@ contains
         & dt(5), dt(6), dt(7), dt(8) * 1000)
     else
       call getarg(1, gc)
-      if (len(trim(gc)) /= 14) then
-        print *, "Format: YYYYMMDDHHMMSS"
+      if (len(trim(gc)) /= 20) then
+        print *, "Format: YYYYMMDDHHMMSSUUUUUU"
         return
       end if
       read (gc, FMT_DT_0) tt
