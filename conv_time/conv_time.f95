@@ -1,14 +1,15 @@
-!****************************************************
+!*******************************************************************************
 ! 各種時刻換算
 !
 !   date          name            version
 !   2018.10.14    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数 : JST（日本標準時）
-!          YYYYMMDDHHMMSSUUUUUU
-!          無指定なら現在(システム日時)と判断。（上記最後の UUUUUU はマイクロ秒）
+!          YYYYMMDD[HHMMSS[MMM]]
+!          無指定なら現在(システム日時)と判断。（上記最後の MMM はミリ秒）
 ! ---
 ! * 定数 DUT1 (= UT1 - UTC) の値は以下を参照。
 !     [日本標準時プロジェクト Announcement of DUT1]
@@ -30,7 +31,7 @@
 !     [NASA - Polynomial Expressions for Delta T]
 !     (http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html)
 ! * 構造型 type(t_time) は time モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program conv_time
   use const, only : SP, DP, JST_UTC, FMT_DT_0
@@ -79,8 +80,8 @@ program conv_time
   stop
 contains
   ! コマンドライン引数取得
-  ! * YYYYMMDDHHMMSSUUUUUU 形式
-  ! * 20桁超入力された場合は、21桁目以降の部分は切り捨てる
+  ! * YYYYMMDD[HHMMSS[MMM]] 形式
+  ! * 17桁超入力された場合は、18桁目以降の部分は切り捨てる
   ! * コマンドライン引数がなければ、システム日付を JST とする
   ! * 日時の整合性チェックは行わない
   !
@@ -89,19 +90,18 @@ contains
   subroutine get_arg(jst, utc)
     implicit none
     type(t_time), intent(out) :: jst, utc
-    character(20) :: gc
+    character(17) :: gc
     integer(SP)   :: dt(8)
-    integer(SP)   :: len_jst
+    integer(SP)   :: len_gc
 
     if (iargc() == 0) then
       call date_and_time(values=dt)
-      jst = t_time(dt(1), dt(2), dt(3), &
-        & dt(5), dt(6), dt(7), dt(8) * 1000)
+      jst = t_time(dt(1), dt(2), dt(3), dt(5), dt(6), dt(7), dt(8))
     else
       call getarg(1, gc)
-      print *, gc
-      if (len(trim(gc)) /= 20) then
-        print *, "Format: YYYYMMDDHHMMSSUUUUUU"
+      len_gc = len(trim(gc))
+      if (len_gc /= 8 .and. len_gc /= 14 .and. len_gc /= 17) then
+        print *, "Format: YYYYMMDD[HHMMSS[MMM]"
         return
       end if
       read (gc, FMT_DT_0) jst

@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! Modules for delta_t calculation
 !
-! date          name            version
-! 2018.10.15    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.15    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module delta_t
   use const
@@ -337,10 +338,9 @@ contains
     type(t_time), intent(in)  :: utc
     integer(SP),  intent(in)  :: utc_tai
     real(DP),     intent(out) :: dt
-    integer(SP) :: year, month, day, hour, minute, second, usecond
+    integer(SP) :: year, month, day, hour, minute, second, msecond
     real(DP)    :: y
 
-    !read (utc, FMT_DT_0) year, month, day, hour, minute, second, usecond
     y = utc%year + (utc%month - 0.5) / 12.0
     dt = 0.0_DP
     select case (utc%year)

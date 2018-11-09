@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! 定数モジュール
 !
-! date          name            version
-! 2018.10.25    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.25    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module const
   implicit none
@@ -16,11 +17,11 @@ module const
   character(*), parameter :: F_LEAP_SEC = "LEAP_SEC.txt"
   character(*), parameter :: F_BIN      = "JPLEPH"
   character(*), parameter :: FMT_DT_0   = &
-    & '(I4I2I2I2I2I2I6)'
+    & '(I4I2I2I2I2I2I3)'
   character(*), parameter :: FMT_DT_1   = &
-    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.6)'
+    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.3)'
   character(*), parameter :: FMT_DT_2   = &
-    & '(I4, "-", I0.2, "-", I0.2, " ", I0.2, ":", I0.2, ":", I0.2, ".", I0.6)'
+    & '(I4, "-", I0.2, "-", I0.2, " ", I0.2, ":", I0.2, ":", I0.2, ".", I0.3)'
   integer(SP),  parameter :: KSIZE      = 2036     ! for JPLEPH
   integer(SP),  parameter :: NRECL      = 4        ! for JPLEPH
   integer(SP),  parameter :: UID        = 10       ! Unit ID of JPLEPH

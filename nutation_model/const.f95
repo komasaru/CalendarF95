@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! 定数モジュール
 !
-! date          name            version
-! 2018.10.18    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.18    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module const
   implicit none
@@ -18,9 +19,9 @@ module const
   character(*), parameter :: FMT_DT_0 = &
     & '(I4I2I2I2I2I2I6)'
   character(*), parameter :: FMT_DT_1 = &
-    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.6)'
+    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.3)'
   character(*), parameter :: FMT_DT_2 = &
-    & '(I4, "-", I0.2, "-", I0.2, " ", I0.2, ":", I0.2, ":", I0.2, ".", I0.6)'
+    & '(I4, "-", I0.2, "-", I0.2, " ", I0.2, ":", I0.2, ":", I0.2, ".", I0.3)'
   integer(SP),  parameter :: J2000    = 2451545  ! Reference epoch (J2000.0)
   integer(SP),  parameter :: DAY_JC   = 36525    ! Days per Julian century
   real(DP),     parameter :: PI       = atan(1.0_DP) * 4.0_DP  ! 円周率

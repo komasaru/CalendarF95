@@ -1,17 +1,19 @@
-!****************************************************
+!*******************************************************************************
 ! バイアス・歳差・章動適用
 !
 !   Date          Author          Version
 !   2018.10.24    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数 : X Y Z [TT]
 !        * X, Y, Z は元の座標（各20桁以内）
 !        * TT は 地球時（省略可）
-!          書式：YYYYMMDDHHMMSSUUUUUU
+!          書式：YYYYMMDD[HHMMSS[MMM]]
+!                (最後の MMM はミリ秒)
 !          無指定なら現在(システム日時)を TT とみなす。
-!****************************************************
+!*******************************************************************************
 !
 program bpn_rotation
   use const
@@ -64,8 +66,8 @@ program bpn_rotation
 contains
   ! コマンドライン引数取得
   ! * X, Y, Z は実数形式（必須、各20桁以内）
-  ! * TT は YYYYMMDDHHMMSSUUUUUU 形式（省略可）
-  ! * TT が20桁超入力された場合は、21桁目以降の部分は切り捨てる
+  ! * TT は YYYYMMDD[HHMMSS[MMM]] 形式（省略可）
+  ! * TT が17桁超入力された場合は、18桁目以降の部分は切り捨てる
   ! * TT 無入力なら、システム日付を TT とみなす
   ! * 日時の整合性チェックは行わない
   !
@@ -75,9 +77,9 @@ contains
     implicit none
     real(DP),     intent(inout) :: crd(3)
     type(t_time), intent(inout) :: tt
-    character(20) :: gc
+    character(17) :: gc
     character(20) :: c(3)
-    integer(SP)  :: i, dt(8)
+    integer(SP)  :: i, dt(8), len_gc
 
     if (iargc() < 3) then
       crd = (/(0.0_DP, i=1,3)/)
@@ -89,12 +91,12 @@ contains
     end do
     if (iargc() == 3) then
       call date_and_time(values=dt)
-      tt = t_time(dt(1), dt(2), dt(3), &
-        & dt(5), dt(6), dt(7), dt(8) * 1000)
+      tt = t_time(dt(1), dt(2), dt(3), dt(5), dt(6), dt(7), dt(8))
     else
       call getarg(4, gc)
-      if (len(trim(gc)) /= 20) then
-        print *, "Format: YYYYMMDDHHMMSSUUUUUU"
+      len_gc = len(trim(gc))
+      if (len_gc /= 8 .and. len_gc /= 14 .and. len_gc /= 17) then
+        print *, "Format: X Y Z YYYYMMDD[HHMMSS[MMM]]"
         return
       end if
       read (gc, FMT_DT_0) tt

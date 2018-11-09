@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! Modules for constant variable
 !
-! date          name            version
-! 2018.10.1a9    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.18    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module const
   implicit none
@@ -15,7 +16,7 @@ module const
   integer(SP),  parameter :: DP = selected_real_kind(2 * precision(1.0_SP))
   character(*), parameter :: F_LEAP_SEC = "LEAP_SEC.txt"
   integer(SP),  parameter :: DAYS(1:12) = &
-    & (/31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)  ! Days per month
+    & (/31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)         ! Days per month
   real(DP),     parameter :: PI         = atan(1.0_DP) * 4.0_DP  ! PI
   real(DP),     parameter :: PI2        = PI * 2.0_DP            ! 2 * PI
   real(DP),     parameter :: PI_180     = PI / 180.0_DP          ! PI / 180
@@ -34,11 +35,11 @@ module const
   real(DP),     parameter :: D2S        = 3600.0_DP
                                           ! Degrees to seconds
   character(*), parameter :: FMT_DT_0   = &
-    & '(I4I2I2I2I2I2I6)'
+    & '(I4I2I2I2I2I2I3)'
   character(*), parameter :: FMT_DT_1   = &
-    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.6)'
+    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.3)'
   character(*), parameter :: FMT_DT_2   = &
-    & '(I4, "-", I2.2, "-", I2.2, " ", I2.2, ":", I2.2, ":", I2.2, ".", I6.6)'
+    & '(I4, "-", I2.2, "-", I2.2, " ", I2.2, ":", I2.2, ":", I2.2, ".", I3.3)'
   ! CIP, CIO 用
   ! Polynomial coefficients
   real(DP), parameter :: POL(6) = (/ &

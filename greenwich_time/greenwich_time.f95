@@ -1,7 +1,7 @@
-!****************************************************
+!*******************************************************************************
 ! グリニジ視恒星時 GAST(= Greenwich Apparent Sidereal Time)等の計算
 ! : IAU2006 による計算
-! 
+!
 !   * IAU SOFA(International Astronomical Union, Standards of Fundamental Astronomy)
 !     の提供する C ソースコード "gst06.c" 等で実装されているアルゴリズムを使用する。
 !   * 参考サイト
@@ -15,13 +15,14 @@
 !
 !   Date          Author          Version
 !   2018.10.18    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数 : 日時(TT（地球時）)
-!        * 書式：YYYYMMDDHHMMSSUUUUUU
+!        * 書式：YYYYMMDD[HHMMSS[MMM]]
 !        * 無指定なら現在(システム日時)を地球時とみなす。
-!****************************************************
+!*******************************************************************************
 !
 program greenwich_time
   use const
@@ -126,8 +127,8 @@ program greenwich_time
   stop
 contains
   ! コマンドライン引数取得
-  ! * YYYYMMDDHHMMSSUUUUUU 形式
-  ! * 20桁超入力された場合は、21桁目以降の部分は切り捨てる
+  ! * YYYYMMDD[HHMMSS[MMM]] 形式
+  ! * 17桁超入力された場合は、18桁目以降の部分は切り捨てる
   ! * コマンドライン引数がなければ、システム日付を TT とする
   ! * 日時の整合性チェックは行わない
   !
@@ -135,17 +136,17 @@ contains
   subroutine get_arg(tt)
     implicit none
     type(t_time), intent(inout) :: tt
-    character(20) :: gc
-    integer(SP)   :: dt(8)
+    character(17) :: gc
+    integer(SP)   :: dt(8), len_gc
 
     if (iargc() == 0) then
       call date_and_time(values=dt)
-      tt = t_time(dt(1), dt(2), dt(3), &
-        & dt(5), dt(6), dt(7), dt(8) * 1000)
+      tt = t_time(dt(1), dt(2), dt(3), dt(5), dt(6), dt(7), dt(8))
     else
       call getarg(1, gc)
-      if (len(trim(gc)) /= 20) then
-        print *, "Format: YYYYMMDDHHMMSSUUUUUU"
+      len_gc = len(trim(gc))
+      if (len_gc /= 8 .and. len_gc /= 14 .and. len_gc /= 17) then
+        print *, "Format: YYYYMMDD[HHMMSS[MMM]]"
         return
       end if
       read (gc, FMT_DT_0) tt

@@ -1,4 +1,4 @@
-!****************************************************
+!*******************************************************************************
 ! JPLEPH(JPL の DE430 バイナリデータ)読み込み、座標（位置・速度）を計算
 ! * 対象天体
 !    1: 水星            (Mercury)
@@ -19,6 +19,7 @@
 !
 !   Date          Author          Version
 !   2018.10.21    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -33,7 +34,7 @@
 ! ---
 ! * 構造型 type(t_time) は time    モジュール内で定義
 ! * 構造型 type(t_bin)  は eph_jpl モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program jpl_calc_430
   use const
@@ -130,8 +131,7 @@ contains
     read (arg_c, *) c
     if (iargc() < 3) then
       call date_and_time(values=dt)
-      utc = t_time(dt(1), dt(2), dt(3), &
-        & dt(5), dt(6), dt(7), dt(8) * 1000)
+      utc = t_time(dt(1), dt(2), dt(3), dt(5), dt(6), dt(7), dt(8))
       call gc2jd(utc, jd)
     else
       call getarg(3, arg_j)

@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! Modules for time calculation
 !
-! date          name            version
-! 2018.10.18    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.18    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module time
   use const
@@ -19,7 +20,7 @@ module time
     integer(SP) :: hour    = 0
     integer(SP) :: minute  = 0
     integer(SP) :: second  = 0
-    integer(SP) :: usecond = 0
+    integer(SP) :: msecond = 0
   end type t_time
 
 contains
@@ -35,7 +36,7 @@ contains
     implicit none
     type(t_time), intent(in)  :: utc
     real(DP),     intent(out) :: jd
-    integer  :: ye, mo, da, ho, mi, se, us
+    integer  :: ye, mo, da, ho, mi, se, ms
     real(DP) :: d, t
 
     ye = utc%year
@@ -44,7 +45,7 @@ contains
     ho = utc%hour
     mi = utc%minute
     se = utc%second
-    us = utc%usecond
+    ms = utc%msecond
 
     if (mo < 3) then
       ye= ye - 1
@@ -55,9 +56,9 @@ contains
       & - int(ye / 100.0_DP)       &
       & + int(30.59_DP * (mo - 2)) &
       & + da + 1721088.5
-    t =  (us / (3600.0_DP * 1000000.0_DP) &
-      & + se / 3600.0_DP                  &
-      & + mi / 60.0_DP                    &
+    t =  (ms / (3600.0_DP * 1.0e3_DP) &
+      & + se / 3600.0_DP              &
+      & + mi / 60.0_DP                &
       & + ho) / 24.0_DP
     jd = d + t
   end subroutine gc2jd
@@ -84,7 +85,7 @@ contains
     character(26) :: f
 
     write (f, FMT_DT_2) &
-      & d%year, d%month, d%day, d%hour, d%minute, d%second, d%usecond
+      & d%year, d%month, d%day, d%hour, d%minute, d%second, d%msecond
   end function date_fmt
 end module time
 

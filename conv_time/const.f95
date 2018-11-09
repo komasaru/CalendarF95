@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! 定数モジュール
 !
-! date          name            version
-! 2018.10.13    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.13    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module const
   implicit none
@@ -28,10 +29,10 @@ module const
   real(DP),     parameter :: T_0        = 2443144.5003725_DP  ! for TCG, TDB, TCB
   real(DP),     parameter :: TDB_0      = -6.55e-5_DP         ! for TDB
   character(*), parameter :: FMT_DT_0   = &
-    & '(I4I2I2I2I2I2I6)'
+    & '(I4I2I2I2I2I2I3)'
   character(*), parameter :: FMT_DT_1   = &
-    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.6)'
+    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.3)'
   character(*), parameter :: FMT_DT_2   = &
-    & '(I4, "-", I0.2, "-", I0.2, " ", I0.2, ":", I0.2, ":", I0.2, ".", I0.6)'
+    & '(I4, "-", I0.2, "-", I0.2, " ", I0.2, ":", I0.2, ":", I0.2, ".", I0.3)'
 end module const
 

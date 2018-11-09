@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! Module for constant variables
 !
-! date          name            version
-! 2018.10.21    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.21    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module const
   implicit none
@@ -39,8 +40,8 @@ module const
   logical,      parameter :: KM    = .false.  ! 単位フラグ（T: km, km/sec, F: AU, AU/day）
   integer(SP),  parameter :: UID   = 10       ! Unit ID of binary file
   character(*), parameter :: FMT_DT_0 = &
-    & '(I4I2I2I2I2I2I6)'
+    & '(I4I2I2I2I2I2I3)'
   character(*), parameter :: FMT_DT_1 = &
-    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.6)'
+    & '(I4, I0.2, I0.2, I0.2, I0.2, I0.2, I0.3)'
 end module const
 

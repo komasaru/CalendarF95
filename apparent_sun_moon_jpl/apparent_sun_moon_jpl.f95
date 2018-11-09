@@ -1,20 +1,22 @@
-!****************************************************
+!*******************************************************************************
 ! 太陽・月の視位置計算
 ! * JPLEPH(JPL の DE430 バイナリデータ)を読み込み、視位置を計算する
 !
 !   Date          Author          Version
 !   2018.10.25    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数 : JST
 !        * JST は 日本標準時（省略可）
-!          書式：YYYYMMDDHHMMSSUUUUUU
+!          書式：YYYYMMDD[HHMMSS[MMM]]
+!                (最後の MMM はミリ秒)
 !          無指定なら現在(システム日時)を JST とみなす。
 ! ---
 ! * 構造型 type(t_time) は time    モジュール内で定義
 ! * 構造型 type(t_bin)  は eph_jpl モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program apparent_sun_moon_jpl
   use const, only : SP, DP, PI, FMT_DT_0, FMT_DT_1
@@ -113,8 +115,8 @@ program apparent_sun_moon_jpl
   stop
 contains
   ! コマンドライン引数取得
-  ! * YYYYMMDDHHMMSSUUUUUU 形式
-  ! * 20桁超入力された場合は、21桁目以降の部分は切り捨てる
+  ! * YYYYMMDD[HHMMSS[MMM]] 形式
+  ! * 17桁超入力された場合は、18桁目以降の部分は切り捨てる
   ! * コマンドライン引数がなければ、システム日付を JST とする
   ! * 日時の整合性チェックは行わない
   !
@@ -122,17 +124,17 @@ contains
   subroutine get_arg(jst)
     implicit none
     type(t_time), intent(inout) :: jst
-    character(20) :: gc
-    integer(SP)   :: dt(8)
+    character(17) :: gc
+    integer(SP)   :: dt(8), len_gc
 
     if (iargc() == 0) then
       call date_and_time(values=dt)
-      jst = t_time(dt(1), dt(2), dt(3), &
-        & dt(5), dt(6), dt(7), dt(8) * 1000)
+      jst = t_time(dt(1), dt(2), dt(3), dt(5), dt(6), dt(7), dt(8))
     else
       call getarg(1, gc)
-      if (len(trim(gc)) /= 20) then
-        print *, "Format: YYYYMMDDHHMMSSUUUUUU"
+      len_gc = len(trim(gc))
+      if (len_gc /= 8 .and. len_gc /= 14 .and. len_gc /= 17) then
+        print *, "Format: YYYYMMDD[HHMMSS[MMM]]"
         return
       end if
       read (gc, FMT_DT_0) jst
