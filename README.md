@@ -103,4 +103,5 @@ $ ./jpl_cal [YYYYMMDDHHMMSSUUUUUU]
 * `jpl_read_430` （JPLEPH(JPL の DE430 バイナリデータ)読み込み）
 * `jpl_calc_430` （JPLEPH(JPL の DE430 バイナリデータ)読み込み、座標（位置・速度）を計算）
 * `apparen_sun_moon_jpl` （太陽・月の視位置計算）
+* `apparen_sun_moon_jcg` （太陽・月の視位置計算（海保・略算式版））
 
