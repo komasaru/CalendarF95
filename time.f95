@@ -1,11 +1,12 @@
-!****************************************************
+!*******************************************************************************
 ! Modules for time calculation
 !
-! date          name            version
-! 2018.10.27    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.27    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module time
   use const
@@ -20,7 +21,7 @@ module time
     integer(SP) :: hour    = 0
     integer(SP) :: minute  = 0
     integer(SP) :: second  = 0
-    integer(SP) :: usecond = 0
+    integer(SP) :: msecond = 0
   end type t_time
 
 contains
@@ -49,22 +50,22 @@ contains
 
   ! 日時の正常化
   !
-  ! :param(inout) type(t_time) dt: 年, 月, 日, 時, 分, 秒, μ秒
+  ! :param(inout) type(t_time) dt: 年, 月, 日, 時, 分, 秒, ミリ秒
   subroutine norm_time(dt)
     implicit none
     type(t_time), intent(inout) :: dt
     integer(SP) :: kbn = 0  ! 繰り上げ(1)か繰り下げ(-1)が
     integer(SP) :: days_m   ! 月内の日数
 
-    ! マイクロ秒（繰り上げ／繰り下げ）
-    do while (dt%usecond > 999)
+    ! ミリ秒（繰り上げ／繰り下げ）
+    do while (dt%msecond > 999)
       kbn = 1
-      dt%usecond = dt%usecond - 1000000
+      dt%msecond = dt%msecond - 1000
       dt%second  = dt%second + 1
     end do
-    do while (dt%usecond < 0)
+    do while (dt%msecond < 0)
       kbn = -1
-      dt%usecond = dt%usecond + 1000000
+      dt%msecond = dt%msecond + 1000
       dt%second  = dt%second - 1
     end do
     ! 秒（繰り上げ／繰り下げ）
@@ -152,7 +153,7 @@ contains
     if (gc%hour    < 0 .or. gc%hour    >     23 .or. &
       & gc%minute  < 0 .or. gc%minute  >     59 .or. &
       & gc%second  < 0 .or. gc%second  >     59 .or. &
-      & gc%usecond < 0 .or. gc%usecond > 999999) then
+      & gc%msecond < 0 .or. gc%msecond > 999999) then
       is_valid_date = .false.
     end if
   end function is_valid_date
@@ -165,7 +166,7 @@ contains
     implicit none
     type(t_time), intent(in)  :: jst
     type(t_time), intent(out) :: utc
-    integer(SP) :: ye, mo, da, ho, mi, se, us
+    integer(SP) :: ye, mo, da, ho, mi, se, ms
 
     ye = jst%year
     mo = jst%month
@@ -173,7 +174,7 @@ contains
     ho = jst%hour
     mi = jst%minute
     se = jst%second
-    us = jst%usecond
+    ms = jst%msecond
 
     ho = ho - JST_UTC
     if (ho < 0) then
@@ -193,7 +194,7 @@ contains
         da = da + 1
       end if
     end if
-    utc = t_time(ye, mo, da, ho, mi, se, us)
+    utc = t_time(ye, mo, da, ho, mi, se, ms)
   end subroutine jst2utc
 
   ! GC(Gregoria Calendar) -> JD(Julian Day)
@@ -204,7 +205,7 @@ contains
     implicit none
     type(t_time), intent(in)  :: utc
     real(DP),     intent(out) :: jd
-    integer  :: ye, mo, da, ho, mi, se, us
+    integer  :: ye, mo, da, ho, mi, se, ms
     real(DP) :: d, t
 
     ye = utc%year
@@ -213,7 +214,7 @@ contains
     ho = utc%hour
     mi = utc%minute
     se = utc%second
-    us = utc%usecond
+    ms = utc%msecond
 
     if (mo < 3) then
       ye= ye - 1
@@ -224,9 +225,9 @@ contains
       & - int(ye / 100.0_DP)       &
       & + int(30.59_DP * (mo - 2)) &
       & + da + 1721088.5
-    t =  (us / (3600.0_DP * 1000000.0_DP) &
-      & + se / 3600.0_DP                  &
-      & + mi / 60.0_DP                    &
+    t =  (ms / (3600.0_DP * 1.0e3_DP) &
+      & + se / 3600.0_DP              &
+      & + mi / 60.0_DP                &
       & + ho) / 24.0_DP
     jd = d + t
   end subroutine gc2jd
@@ -268,12 +269,11 @@ contains
     tm = 86400.0_DP * (jd_w - int(jd_w))
     ut(3) = int(tm / 3600.0_DP)
     ut(4) = int((tm - 3600 * ut(3)) / 60.0_DP)
-    ! マイクロ秒対応
+    ! ミリ秒対応
     !ut(5) = tm - 3600 * ut(3) - 60 * ut(4)
     tm_w = tm - 3600 * ut(3) - 60 * ut(4)
     ut(5) = int(tm_w)
-    ut(6) = int((tm_w - ut(5)) * 1000000.0_DP)
-    !write (gc, FMT_DT_1) ut
+    ut(6) = int((tm_w - ut(5)) * 1.0e3_DP)
     gc = t_time(ut(0), ut(1), ut(2), ut(3), ut(4), ut(5), ut(6))
   end subroutine jd2gc
 
@@ -336,7 +336,7 @@ contains
     type(t_time), intent(in)  :: utc
     integer(SP),  intent(in)  :: utc_tai
     type(t_time), intent(out) :: tai
-    integer(SP)  :: ye, mo, da, ho, mi, se, us
+    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     integer(SP)  :: days_m
     type(t_time) :: tmp
 
@@ -346,10 +346,10 @@ contains
     ho = utc%hour
     mi = utc%minute
     se = utc%second
-    us = utc%usecond
+    ms = utc%msecond
 
     se = se - utc_tai
-    tmp = t_time(ye, mo, da, ho, mi, se, us)
+    tmp = t_time(ye, mo, da, ho, mi, se, ms)
     call norm_time(tmp)
     tai = tmp
   end subroutine utc2tai
@@ -362,7 +362,7 @@ contains
     implicit none
     type(t_time), intent(in)  :: tai
     type(t_time), intent(out) :: tt
-    integer(SP)  :: ye, mo, da, ho, mi, se, us
+    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     type(t_time) :: tmp
 
     ye = tai%year
@@ -371,11 +371,11 @@ contains
     ho = tai%hour
     mi = tai%minute
     se = tai%second
-    us = tai%usecond
+    ms = tai%msecond
 
     se = se + int(TT_TAI)
-    us = us + nint((TT_TAI - int(TT_TAI)) * 1000000.0_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, us)
+    ms = ms + nint((TT_TAI - int(TT_TAI)) * 1.0e3_DP)
+    tmp = t_time(ye, mo, da, ho, mi, se, ms)
     call norm_time(tmp)
     tt = tmp
   end subroutine tai2tt
@@ -390,7 +390,7 @@ contains
     type(t_time), intent(in)  :: tt
     real(8),      intent(in)  :: jd
     type(t_time), intent(out) :: tcb
-    integer(SP)  :: ye, mo, da, ho, mi, se, us
+    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     real(DP)     :: s
     type(t_time) :: tmp
 
@@ -400,12 +400,12 @@ contains
     ho = tt%hour
     mi = tt%minute
     se = tt%second
-    us = tt%usecond
+    ms = tt%msecond
 
     s = L_B * (jd - T_0) * SEC_DAY
     se = se + int(s)
-    us = us + nint((s - int(s)) * 1000000.0_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, us)
+    ms = ms + nint((s - int(s)) * 1.0e3_DP)
+    tmp = t_time(ye, mo, da, ho, mi, se, ms)
     call norm_time(tmp)
     tcb = tmp
   end subroutine tt2tcb
@@ -420,7 +420,7 @@ contains
     type(t_time), intent(in)  :: tcb
     real(8),      intent(in)  :: jd_tcb
     type(t_time), intent(out) :: tdb
-    integer(SP)  :: ye, mo, da, ho, mi, se, us
+    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     real(DP)     :: s
     type(t_time) :: tmp
 
@@ -430,27 +430,27 @@ contains
     ho = tcb%hour
     mi = tcb%minute
     se = tcb%second
-    us = tcb%usecond
+    ms = tcb%msecond
 
     s = L_B * (jd_tcb - T_0) * SEC_DAY - TDB_0
     se = se - int(s)
-    us = us - nint((s - int(s)) * 1000000.0_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, us)
+    ms = ms - nint((s - int(s)) * 1.0e3_DP)
+    tmp = t_time(ye, mo, da, ho, mi, se, ms)
     call norm_time(tmp)
     tdb = tmp
   end subroutine tcb2tdb
 
   ! 日付文字列の整形
-  ! * type(t_time)型 -> YYYY-MM-DD HH:MM:SS.UUUUUU
+  ! * type(t_time)型 -> YYYY-MM-DD HH:MM:SS.MMM
   !
   ! :param(in) type(t_time)  d
-  ! :return    character(26) f
+  ! :return    character(23) f
   function date_fmt(d) result(f)
     type(t_time), intent(in) :: d
-    character(26) :: f
+    character(23) :: f
 
     write (f, FMT_DT_2) &
-      & d%year, d%month, d%day, d%hour, d%minute, d%second, d%usecond
+      & d%year, d%month, d%day, d%hour, d%minute, d%second, d%msecond
   end function date_fmt
 end module time
 

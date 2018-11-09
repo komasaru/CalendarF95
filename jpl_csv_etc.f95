@@ -60,8 +60,8 @@ program jpl_etc
             & " - ", F11.3, ",", I1, ", ", I2, ", ", F11.8)', &
             & y, m, d, jd, yobi, kanshi, moon_age
         write (UID_CSV, &
-            & '(I4, ",", I2, ",", I2, ",", ' // &
-            & 'F11.3, ",", I1, ",", I2, ",", F11.8)') &
+            & '(I4, ",", I2, ",", I2, ",", &
+            &   F11.3, ",", I1, ",", I2, ",", F11.8)') &
             & y, m, d, jd, yobi, kanshi, moon_age
       end do
     end do

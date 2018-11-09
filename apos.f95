@@ -1,18 +1,18 @@
-!****************************************************
+!*******************************************************************************
 ! Modules for apparent position of Sun/Moon
 !
-! date          name            version
-! 2018.10.25    mk-mode.com     1.00 新規作成
+!   date          name            version
+!   2018.10.25    mk-mode.com     1.00 新規作成
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
-!****************************************************
+!*******************************************************************************
 !
 module apos
   use const
   use coord
   use eph_bpn
   use eph_jpl
-  use time, only : t_time, jd2jc
+  use time, only : jd2jc
   implicit none
   private
   public :: get_icrs, get_dist_e, calc_sun, calc_moon
