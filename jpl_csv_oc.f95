@@ -1,15 +1,17 @@
-!****************************************************
+!*******************************************************************************
 ! 旧暦一覧(CSV 出力)
 !
 !   Date          Author          Version
 !   2018.10.31    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: なし
 ! ---
 ! * 構造型 type(t_time) は time モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program jpl_oc
   use const, only : SP, DP, Y_MIN, Y_MAX, DAYS, JST_D
@@ -76,7 +78,7 @@ program jpl_oc
       & form   = "formatted", &
       & status = "new")
   if (ios /= 0) then
-    print *, "[ERROR] Failed to open file: " // F_CSV
+    print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV
     stop
   end if
 
@@ -139,7 +141,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_S
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_S
       stop
     end if
 
@@ -147,7 +149,11 @@ contains
     len_n = 0
     do
       read (UID_CSV_S, '(A)', iostat = ios) buf
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_S
+      end if
       read (buf(12:14), '(I3)') kokei
       if (mod(kokei, 90) /= 0) cycle
       len_n = len_n + 1
@@ -181,7 +187,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_S
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_S
       stop
     end if
 
@@ -189,7 +195,11 @@ contains
     len_c = 0
     do
       read (UID_CSV_S, '(A)', iostat = ios) buf
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_S
+      end if
       read (buf(12:14), '(I3)') kokei
       if (mod(kokei, 30) /= 0) cycle
       len_c = len_c + 1
@@ -223,7 +233,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_M
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_M
       stop
     end if
 
@@ -231,7 +241,11 @@ contains
     len_s = 0
     do
       read (UID_CSV_M, '(A)', iostat = ios) buf
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_M
+      end if
       if (buf(1:1) == " ") cycle
       if (buf(12:14) /= "  0") cycle
       len_s = len_s + 1

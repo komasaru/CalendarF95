@@ -1,16 +1,18 @@
-!****************************************************
+!*******************************************************************************
 ! 祝日一覧(CSV 出力)
 ! * 祝日マスタの名称は全角10文字(30byte)以下を想定
 !
 !   Date          Author          Version
 !   2018.10.29    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: なし
 ! ---
 ! * 構造型 type(t_time) は time モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program jpl_holiday
   use const, only : SP, DP, Y_MIN, Y_MAX, Y_ST_K, Y_ST_F, FMT_DT_0
@@ -62,7 +64,7 @@ program jpl_holiday
       & form   = "formatted", &
       & status = "new")
   if (ios /= 0) then
-    print *, "[ERROR] Failed to open file: " // F_CSV
+    print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV
     stop
   end if
 
@@ -112,7 +114,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_TXT_H
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_TXT_H
       stop
     end if
 
@@ -122,7 +124,11 @@ contains
       read (UID_TXT_H, &
         & '(I2, X, I2, X, I2, X, I1, X, I4, X, I4, X, A15)', &
         & iostat = ios) h_id, m, d, kbn, y_s, y_e, h_name
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_TXT_H
+      end if
       i = i + 1
       mst_h(i) = t_mst(h_id, m, d, kbn, y_s, y_e, h_name)
     end do
@@ -358,14 +364,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_S
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_S
       stop
     end if
 
     ! 二十四節気一覧 CSV ファイル READ
     do
       read (UID_CSV_S, *, iostat = ios) y, m, d, kokei, jst
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_S
+      end if
       sekkis(y_idx(y), m, d) = kokei
     end do
 

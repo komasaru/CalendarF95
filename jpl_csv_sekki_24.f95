@@ -1,9 +1,11 @@
-!****************************************************
+!*******************************************************************************
 ! 二十四節気一覧(CSV 出力)
 ! * 計算対象：「Y_MIN - 1 年〜 Y_MAX + 1 年」
 !
 !   Date          Author          Version
 !   2018.10.27    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -11,7 +13,7 @@
 ! ---
 ! * 構造型 type(t_time) は time    モジュール内で定義
 ! * 構造型 type(t_bin)  は eph_jpl モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program jpl_sekki_24
   use const, only : SP, DP, Y_MIN, Y_MAX, JST_D, PI
@@ -36,7 +38,7 @@ program jpl_sekki_24
       & form   = "formatted", &
       & status = "new")
   if (ios /= 0) then
-    print *, "[ERROR] Failed to open file: " // F_CSV
+    print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV
     stop
   end if
 

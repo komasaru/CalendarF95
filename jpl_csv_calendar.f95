@@ -1,21 +1,21 @@
-!****************************************************
+!*******************************************************************************
 ! カレンダ一覧(CSV 出力; DB 登録用)
 ! * 出力項目
-!   年, 月, 日, ユリウス日, 曜日, 祝日, 黄経(太陽),
-!   黄経(月), 月齢, 旧暦(年), 旧暦(閏月フラグ),
-!   旧暦(月), 旧暦(日), 六曜, 干支(日), 二十四節気,
+!   年, 月, 日, ユリウス日, 曜日, 祝日, 黄経(太陽),黄経(月), 月齢, 旧暦(年),
+!   旧暦(閏月フラグ), 旧暦(月), 旧暦(日), 六曜, 干支(日), 二十四節気,
 !   雑節1, 雑節2, 節句
-!   （曜日, 祝日, 六曜, 干支(日), 二十四節気, 雑節,
-!     節句を表す数字については const モジュールを参照
-!     のこと）
+!   （曜日, 祝日, 六曜, 干支(日), 二十四節気, 雑節, 節句を表す数字については
+!     const モジュールを参照のこと）
 !
 !   Date          Author          Version
 !   2018.11.02    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: なし
-!****************************************************
+!*******************************************************************************
 !
 program jpl_csv_calendar
   use const, only : SP, DP, Y_MIN, Y_MAX, DAYS
@@ -78,7 +78,7 @@ program jpl_csv_calendar
       & form   = "formatted", &
       & status = "new")
   if (ios /= 0) then
-    print *, "[ERROR] Failed to open file: " // F_CSV
+    print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV
     stop
   end if
 
@@ -145,14 +145,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_K
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_K
       stop
     end if
 
     ! 黄経一覧 CSV ファイル READ
     do
       read (UID_CSV_IN, *, iostat = ios) y, m, d, k_s, k_m
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_K
+      end if
       kokeis(y_idx(y), m, d) = t_kokei(k_s, k_m)
     end do
 
@@ -181,14 +185,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_S
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_S
       stop
     end if
 
     ! 二十四節気一覧 CSV ファイル READ
     do
       read (UID_CSV_IN, *, iostat = ios) y, m, d, kokei, jst
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_S
+      end if
       sekkis(y_idx(y), m, d) = kokei
     end do
 
@@ -213,14 +221,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_Z
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_Z
       stop
     end if
 
     ! 雑節一覧 CSV ファイル READ
     do
       read (UID_CSV_IN, *, iostat = ios) y, m, d, z_1, z_2
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_Z
+      end if
       zassetsus(y_idx(y), m, d) = t_zassetsu(z_1, z_2)
     end do
 
@@ -249,14 +261,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_H
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_H
       stop
     end if
 
     ! 祝日一覧 CSV ファイル READ
     do
       read (UID_CSV_IN, *, iostat = ios) y, m, d, holiday
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_H
+      end if
       holidays(y_idx(y), m, d) = holiday
     end do
 
@@ -282,14 +298,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_E
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_E
       stop
     end if
 
     ! その他一覧 CSV ファイル READ
     do
       read (UID_CSV_IN, *, iostat = ios) y, m, d, jd, yobi, kanshi, moon_age
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_E
+      end if
       etcs(y_idx(y), m, d) = t_etc(jd, yobi, kanshi, moon_age)
     end do
 
@@ -315,7 +335,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_O
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_O
       stop
     end if
 
@@ -324,7 +344,11 @@ contains
       flag_leap = .false.
       read (UID_CSV_IN, *, iostat = ios) &
         & y, m, d, year, leap, month, day, rokuyo
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_O
+      end if
       if (leap == 1) flag_leap = .true.
       ocs(y_idx(y), m, d) = t_oc(year, flag_leap, month, day, rokuyo)
     end do

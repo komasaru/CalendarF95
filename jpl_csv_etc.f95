@@ -1,15 +1,17 @@
-!****************************************************
+!*******************************************************************************
 ! その他（曜日、JD、月齢、干支、節句）一覧(CSV出力)
 !
 !   Date          Author          Version
 !   2018.10.30    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: なし
 ! ---
 ! * 構造型 type(t_time) は time モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program jpl_etc
   use const, only : SP, DP, Y_MIN, Y_MAX, DAYS, JST_D, FMT_DT_2
@@ -40,7 +42,7 @@ program jpl_etc
       & form   = "formatted", &
       & status = "new")
   if (ios /= 0) then
-    print *, "[ERROR] Failed to open file: " // F_CSV
+    print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV
     stop
   end if
 
@@ -98,7 +100,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_M
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_M
       stop
     end if
 
@@ -106,7 +108,11 @@ contains
     len_s = 0
     do
       read (UID_CSV_M, '(A)', iostat = ios) buf
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_M
+      end if
       if (buf(1:1) == " ") cycle
       if (buf(12:14) /= "  0") cycle
       len_s = len_s + 1

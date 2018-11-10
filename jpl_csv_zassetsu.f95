@@ -1,15 +1,17 @@
-!****************************************************
+!*******************************************************************************
 ! 雑節一覧(CSV 出力)
 !
 !   Date          Author          Version
 !   2018.10.28    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: なし
 ! ---
 ! * 構造型 type(t_time) は time モジュール内で定義
-!****************************************************
+!*******************************************************************************
 !
 program jpl_zassetsu
   use const, only : SP, DP, Y_MIN, Y_MAX, DAYS, JST_D
@@ -41,7 +43,7 @@ program jpl_zassetsu
       & form   = "formatted", &
       & status = "new")
   if (ios /= 0) then
-    print *, "[ERROR] Failed to open file: " // F_CSV
+    print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV
     stop
   end if
 
@@ -92,14 +94,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_K
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_K
       stop
     end if
 
     ! 黄経一覧 CSV ファイル READ
     do
       read (UID_CSV_K, *, iostat = ios) y, m, d, k_s, k_m
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_K
+      end if
       kokeis(y_idx(y), m, d) = k_s
     end do
 
@@ -128,14 +134,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_CSV_S
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_CSV_S
       stop
     end if
 
     ! 二十四節気一覧 CSV ファイル READ
     do
       read (UID_CSV_S, *, iostat = ios) y, m, d, kokei, jst
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_CSV_S
+      end if
       sekkis(y_idx(y), m, d) = kokei
     end do
 
