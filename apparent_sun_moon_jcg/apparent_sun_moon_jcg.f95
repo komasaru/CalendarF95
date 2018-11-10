@@ -1,23 +1,22 @@
-!****************************************************
+!*******************************************************************************
 ! 海上保安庁の天測暦より太陽・月の視位置を計算
 ! * 視黄経・視黄緯の計算を追加したもの
 !
 !   Date          Author          Version
 !   2018.11.07    mk-mode.com     1.00 新規作成
+!   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: UST（協定世界時）
-!       * 書式：YYYYMMDDHHMMSS
-!               （年・月・日・時・分・秒）
+!       * 書式：YYYYMMDDHHMMSS (年・月・日・時・分・秒)
 !       * 無指定なら現在(システム日時)を UTC とみなす
-!       * 対応範囲は計算用係数データの用意されている
-!         年のみ（2008年〜）
+!       * 対応範囲は計算用係数データの用意されている年のみ（2008年〜）
 ! ---
-! * 係数ファイルは、扱いやすくするために1つのファイル
-!   にまとめた上、整形している。
+! * 係数ファイルは、扱いやすくするために1つのファイルにまとめた上、整形している
 !   （1行は、年, a, b, 係数）
-!****************************************************
+!*******************************************************************************
 !
 program jcg_ephemeris
   implicit none
@@ -196,7 +195,7 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_DELTA_T
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_DELTA_T
       stop
     end if
 
@@ -204,7 +203,11 @@ contains
     i = 0
     do
       read (UID_DT, fmt=*, iostat = ios) year, dt
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_DELTA_T
+      end if
       i = i + 1
       dts(i) = t_dt(year, dt)
     end do
@@ -320,14 +323,18 @@ contains
         & form   = "formatted",  &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // f_name
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, f_name
       stop
     end if
 
     ! 係数 TXT ファイル READ
     do
       read (UID_C, fmt=*, iostat = ios) y, a, b, c
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, f_name
+      end if
       if (y /= year) cycle
       if (int(tm) < a .or. b < int(tm)) cycle
       item = t_sun(y, a, b, c)
@@ -362,14 +369,18 @@ contains
         & form   = "formatted",  &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // f_name
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, f_name
       stop
     end if
 
     ! 係数 TXT ファイル READ
     do
       read (UID_C, fmt=*, iostat = ios) y, a, b, c
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, f_name
+      end if
       if (y /= year) cycle
       if (int(tm) < a .or. b < int(tm)) cycle
       item = t_moon(y, a, b, c)
@@ -404,14 +415,18 @@ contains
         & form   = "formatted",  &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // f_name
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, f_name
       stop
     end if
 
     ! 係数 TXT ファイル READ
     do
       read (UID_C, fmt=*, iostat = ios) y, a, b, c
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, f_name
+      end if
       if (y /= year) cycle
       if (int(tm) < a .or. b < int(tm)) cycle
       item = t_r(y, a, b, c)

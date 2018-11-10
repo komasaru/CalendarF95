@@ -4,6 +4,8 @@
 !   date          name            version
 !   2018.10.25    mk-mode.com     1.00 新規作成
 !   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
+!   2018.11.10    mk-mode.com     1.02 テキストファイル OPEN/READ 時のエラー処理
+!                                      を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 !*******************************************************************************
@@ -243,14 +245,18 @@ contains
         & form   = "formatted", &
         & status = "old")
     if (ios /= 0) then
-      print *, "[ERROR] Failed to open file: " // F_LEAP_SEC
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_LEAP_SEC
       stop
     end if
 
     utc_tai = 0
     do
       read (10, *, iostat = ios) date, val
-      if (ios /= 0) exit
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_LEAP_SEC
+      end if
       if (date == "") exit
       if (date > utc_t) exit
       utc_tai = val
