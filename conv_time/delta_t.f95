@@ -234,7 +234,6 @@ contains
 
     write (utc, '(I4I2.2, "01")') year, month
     t = y - 1975.0_DP
-    print *, utc
     if (utc < "19720101") then
       dt =  45.45_DP            &
        & + ( 1.067_DP           &
