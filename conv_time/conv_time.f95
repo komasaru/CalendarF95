@@ -4,6 +4,7 @@
 !   date          name            version
 !   2018.10.14    mk-mode.com     1.00 新規作成
 !   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
+!   2018.11.11    mk-mode.com     1.02 ΔT計算に DUT1 を加味
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -47,18 +48,18 @@ program conv_time
   if (jst%year == 0) stop
 
   ! 各種時刻換算
-  call gc2jd(utc, jd)              ! UTC -> JD
-  call jd2jc(jd, t)                ! JD  -> JC
-  call utc2utc_tai(utc, utc_tai)   ! UTC -> UTC - TAI
-  call utc2dut1(utc, dut1)         ! UTC -> DUT1
-  call utc2dt(utc, utc_tai, dt)    ! UTC -> delta T
-  call utc2tai(utc, utc_tai, tai)  ! UTC -> TAI
-  call utc2ut1(utc, dut1, ut1)     ! UTC -> UT1
-  call tai2tt(tai, tt)             ! TAI -> TT
-  call tt2tcg(tt, jd, tcg)         ! TT  -> TCG
-  call tt2tcb(tt, jd, tcb)         ! TT  -> TCB
-  call gc2jd(tcb, jd_tcb)          ! TCB -> JD(TCB)
-  call tcb2tdb(tcb, jd_tcb, tdb)   ! TCB -> TDB
+  call gc2jd(utc, jd)                  ! UTC -> JD
+  call jd2jc(jd, t)                    ! JD  -> JC
+  call utc2utc_tai(utc, utc_tai)       ! UTC -> UTC - TAI
+  call utc2dut1(utc, dut1)             ! UTC -> DUT1
+  call utc2dt(utc, utc_tai, dut1, dt)  ! UTC -> delta T
+  call utc2tai(utc, utc_tai, tai)      ! UTC -> TAI
+  call utc2ut1(utc, dut1, ut1)         ! UTC -> UT1
+  call tai2tt(tai, tt)                 ! TAI -> TT
+  call tt2tcg(tt, jd, tcg)             ! TT  -> TCG
+  call tt2tcb(tt, jd, tcb)             ! TT  -> TCB
+  call gc2jd(tcb, jd_tcb)              ! TCB -> JD(TCB)
+  call tcb2tdb(tcb, jd_tcb, tdb)       ! TCB -> TDB
 
   ! 結果出力
   print '("      JST: ", A)',                date_fmt(jst)

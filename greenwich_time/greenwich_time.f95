@@ -16,6 +16,7 @@
 !   Date          Author          Version
 !   2018.10.18    mk-mode.com     1.00 新規作成
 !   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
+!   2018.11.11    mk-mode.com     1.02 ΔT計算に DUT1 を加味
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -36,7 +37,7 @@ program greenwich_time
   implicit none
   type(t_time) :: tt, ut1
   integer(SP)  :: utc_tai, i
-  real(DP)     :: jd, jc, dt, jd_ut1
+  real(DP)     :: jd, jc, dut1, dt, jd_ut1
   real(DP)     :: gam_b, phi_b, psi_b, eps_a, fj2
   real(DP)     :: d_psi_ls, d_eps_ls, d_psi_pl, d_eps_pl, d_psi, d_eps
   real(DP)     :: mtx(3, 3), xy(2), s
@@ -50,7 +51,8 @@ program greenwich_time
   call gc2jd(tt, jd)
   call jd2jc(jd, jc)
   call utc2utc_tai(tt, utc_tai)
-  call utc2dt(tt, utc_tai, dt)
+  call utc2dut1(tt, dut1)
+  call utc2dt(tt, utc_tai, dut1, dt)
   call tt2ut1(tt, dt, ut1)
   call gc2jd(ut1, jd_ut1)
   ! === Fukushima-Williams angles for frame bias and precession.

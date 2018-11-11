@@ -4,6 +4,7 @@
 !   date          name            version
 !   2018.10.18    mk-mode.com     1.00 新規作成
 !   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
+!   2018.11.11    mk-mode.com     1.02 F_DUT1 追加
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 !*******************************************************************************
@@ -15,6 +16,7 @@ module const
   integer,      parameter :: SP = kind(1.0)
   integer(SP),  parameter :: DP = selected_real_kind(2 * precision(1.0_SP))
   character(*), parameter :: F_LEAP_SEC = "LEAP_SEC.txt"
+  character(*), parameter :: F_DUT1     = "DUT1.txt"
   integer(SP),  parameter :: DAYS(1:12) = &
     & (/31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)         ! Days per month
   real(DP),     parameter :: PI         = atan(1.0_DP) * 4.0_DP  ! PI

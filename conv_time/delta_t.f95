@@ -1,9 +1,10 @@
 !*******************************************************************************
 ! Modules for delta_t calculation
 !
-! date          name            version
-! 2018.10.15    mk-mode.com     1.00 新規作成
-! 2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
+!   date          name            version
+!   2018.10.15    mk-mode.com     1.00 新規作成
+!   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
+!   2018.11.11    mk-mode.com     1.02 ΔT計算に DUT1 を加味
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 !*******************************************************************************
@@ -223,11 +224,13 @@ contains
   ! :param(in) integer    year
   ! :param(in) integer   month
   ! :param(in) integer utc_tai
+  ! :param(in) real(8)    dut1
   ! :return    real(8)      dt
-  function before_1986(y, year, month, utc_tai) result(dt)
+  function before_1986(y, year, month, utc_tai, dut1) result(dt)
     implicit none
     real(DP),    intent(in) :: y
     integer(SP), intent(in) ::year, month, utc_tai
+    real(DP),    intent(in) :: dut1
     real(DP)     :: dt
     character(8) :: utc
     real(DP)     :: t
@@ -241,7 +244,7 @@ contains
        & + (-1.0_DP / 718.0_DP) &
        & * t) * t) * t
     else
-      dt = TT_TAI - utc_tai
+      dt = TT_TAI - utc_tai - dut1
     end if
   end function before_1986
 
@@ -251,18 +254,20 @@ contains
   ! :param(in) integer    year
   ! :param(in) integer   month
   ! :param(in) integer utc_tai
+  ! :param(in) real(8)    dut1
   ! :return    real(8)      dt
-  function before_2005(y, year, month, utc_tai) result(dt)
+  function before_2005(y, year, month, utc_tai, dut1) result(dt)
     implicit none
     real(DP),    intent(in) :: y
-    integer(SP), intent(in) ::year, month, utc_tai
+    integer(SP), intent(in) :: year, month, utc_tai
+    real(DP),    intent(in) :: dut1
     real(DP)     :: dt
     character(8) :: utc
     real(DP)     :: t
 
     write (utc, '(I4I2, "01")') year, month
     t = y - 2000.0_DP
-    dt = TT_TAI - utc_tai
+    dt = TT_TAI - utc_tai - dut1
   end function before_2005
 
   ! 2005 <= year and year < 2050
@@ -271,11 +276,13 @@ contains
   ! :param(in) integer    year
   ! :param(in) integer   month
   ! :param(in) integer utc_tai
+  ! :param(in) real(8)    dut1
   ! :return    real(8)      dt
-  function before_2050(y, year, month, utc_tai) result(dt)
+  function before_2050(y, year, month, utc_tai, dut1) result(dt)
     implicit none
-    real(DP),     intent(in) :: y
-    integer(SP),  intent(in) :: year, month, utc_tai
+    real(DP),    intent(in) :: y
+    integer(SP), intent(in) :: year, month, utc_tai
+    real(DP),    intent(in) :: dut1
     real(DP)     :: dt
     character(8) :: utc
     real(DP)     :: t
@@ -290,7 +297,7 @@ contains
        & + ( 0.005589_DP) &
        & * t) * t
     else
-      dt = TT_TAI - utc_tai
+      dt = TT_TAI - utc_tai - dut1
     end if
   end function before_2050
 
@@ -331,11 +338,13 @@ contains
   !
   ! :param(in)  type(t_time) utc
   ! :param(in)  integer  utc_tai
+  ! :param(in)  real(8)     dut1
   ! :param(out) real(8)       dt
-  subroutine utc2dt(utc, utc_tai, dt)
+  subroutine utc2dt(utc, utc_tai, dut1, dt)
     implicit none
     type(t_time), intent(in)  :: utc
     integer(SP),  intent(in)  :: utc_tai
+    real(DP),     intent(in)  :: dut1
     real(DP),     intent(out) :: dt
     integer(SP) :: year, month, day, hour, minute, second, msecond
     real(DP)    :: y
@@ -364,11 +373,11 @@ contains
     case (1941:1960)
       dt = before_1961(y)
     case (1961:1985)
-      dt = before_1986(y, utc%year, utc%month, utc_tai)
+      dt = before_1986(y, utc%year, utc%month, utc_tai, dut1)
     case (1986:2004)
-      dt = before_2005(y, utc%year, utc%month, utc_tai)
+      dt = before_2005(y, utc%year, utc%month, utc_tai, dut1)
     case (2005:2049)
-      dt = before_2050(y, utc%year, utc%month, utc_tai)
+      dt = before_2050(y, utc%year, utc%month, utc_tai, dut1)
     case (2050:2149)
       dt = until_2150(y)
     case (2150:)

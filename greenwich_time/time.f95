@@ -6,6 +6,7 @@
 !   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !   2018.11.10    mk-mode.com     1.02 テキストファイル OPEN/READ 時のエラー処理
 !                                      を変更
+!   2018.11.11    mk-mode.com     1.03 UTC -> DUT1 計算を追加
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 !*******************************************************************************
@@ -14,7 +15,7 @@ module time
   use const
   implicit none
   private
-  public :: gc2jd, jd2jc, utc2utc_tai, tt2ut1, deg2hms, date_fmt
+  public :: gc2jd, jd2jc, utc2utc_tai, utc2dut1, tt2ut1, deg2hms, date_fmt
   type, public :: t_time
     integer(SP) :: year    = 0
     integer(SP) :: month   = 0
@@ -224,6 +225,48 @@ contains
 
     close(10)
   end subroutine utc2utc_tai
+
+  ! UTC(協定世界時) -> DUT1(UT1(世界時1) - UTC(協定世界時))
+  !
+  ! :param(in)  type(t_time) utc
+  ! :param(out) real(8)     dut1
+  subroutine utc2dut1(utc, dut1)
+    implicit none
+    type(t_time), intent(in)  :: utc
+    real(DP),     intent(out) :: dut1
+    character(8) :: date, utc_t
+    integer(SP)  :: ios
+    real(DP)     :: val
+
+    ! 対象の UTC 年月日
+    write (utc_t, '(I4I0.2I0.2)') utc%year, utc%month, utc%day
+
+    open (unit   = 10,          &
+        & iostat = ios,         &
+        & file   = F_DUT1,      &
+        & action = "read",      &
+        & form   = "formatted", &
+        & status = "old")
+    if (ios /= 0) then
+      print '("[ERROR:", I0 ,"] Failed to open file: ", A)', ios, F_DUT1
+      stop
+    end if
+
+    dut1 = 0.0
+    do
+      read (10, *, iostat = ios) date, val
+      if (ios < 0) then
+        exit
+      else if (ios > 0) then
+        print '("[ERROR:", I0 ,"] Failed to read file: ", A)', ios, F_DUT1
+      end if
+      if (date == "") exit
+      if (date > utc_t) exit
+      dut1 = val
+    end do
+
+    close(10)
+  end subroutine utc2dut1
 
   ! TT(地球時) -> UT1(世界時1)
   !
