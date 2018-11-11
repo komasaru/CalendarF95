@@ -8,8 +8,8 @@
 実行方法
 ========
 
-`./nutation_model [YYYYMMDDHHMMSSUUUUUU]`
+`./nutation_model [YYYYMMDDHHMMSSMMM]`
 
-* TT（地球時）は「年・月・日・時・分・秒・マイクロ秒」を20桁で指定する。
+* TT（地球時）は「年・月・日・時・分・秒・ミリ秒」を17桁で指定する。
 * TT（地球時）を指定しない場合は、システム日時を TT とみなす。
 

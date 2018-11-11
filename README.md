@@ -84,7 +84,7 @@ $ ./jpl_csv_etc
 $ ./jpl_csv_oc
 $ ./jpl_csv_calendar
 $ ./jpl_csv_calendar_j
-$ ./jpl_cal [YYYYMMDDHHMMSSUUUUUU]
+$ ./jpl_cal [YYYYMMDD]
 ```
 
 既に該当の CSV ファイルが存在する場合は実行（上書き）できないようしている。  
