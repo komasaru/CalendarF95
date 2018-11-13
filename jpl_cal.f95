@@ -6,7 +6,7 @@
 !   Date          Author          Version
 !   2018.11.05    mk-mode.com     1.00 新規作成
 !   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
-!                                      を変更
+!   2018.11.13    mk-mode.com     1.02 雑節文字列のスペース全角->半角処理を修正
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -486,6 +486,10 @@ contains
 
     len_src = len(src)
     idx = index(src, "　")
+    if (idx == 0) then
+      dst = src
+      return
+    end if
     dst(1:idx-1) = src(1:idx-1)
     do i = idx, len_src
       dst(i:i) = " "
