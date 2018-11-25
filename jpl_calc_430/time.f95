@@ -51,15 +51,15 @@ contains
       ye= ye - 1
       mo= mo + 12
     end if
-    d =   int(365.25_DP * ye)      &
-      & + int(ye / 400.0_DP)       &
-      & - int(ye / 100.0_DP)       &
-      & + int(30.59_DP * (mo - 2)) &
-      & + da + 1721088.5
-    t =  (ms / (3600.0_DP * 1.0e3_DP) &
-      & + se / 3600.0_DP              &
-      & + mi / 60.0_DP                &
-      & + ho) / 24.0_DP
+    d = int(365.25_DP * ye)      &
+    & + int(ye / 400.0_DP)       &
+    & - int(ye / 100.0_DP)       &
+    & + int(30.59_DP * (mo - 2)) &
+    & + da + 1721088.5_DP
+    t = (ms / (3600.0_DP * 1.0e3_DP) &
+    & + se / 3600.0_DP               &
+    & + mi / 60.0_DP                 &
+    & + ho) / 24.0_DP
     jd = d + t
   end subroutine gc2jd
 end module time

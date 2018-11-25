@@ -6,6 +6,7 @@
 !   2018.10.29    mk-mode.com     1.00 新規作成
 !   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
 !                                      を変更
+!   2018.11.25    mk-mode.com     1.02 日の加減算処理を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -46,8 +47,7 @@ program jpl_moon
   ! 計算
   tm_l = t_time(Y_MIN - 1, 1, 1, 0, 0, 0, 0)
   tm_h = t_time(Y_MIN - 1, 1, 1, 0, 0, 0, 0)
-  tm_h%day = tm_h%day + 10
-  call norm_time(tm_h)
+  call add_day(tm_h, 10.0_DP)
   call gc2jd(tm_l, jd)
   call comp_kokei(jd - JST_D, kokei_s, kokei_m)
   kokei_d = kokei_m - kokei_s
@@ -70,8 +70,7 @@ program jpl_moon
         & tm_x%hour, tm_x%minute, tm_x%second
     tm_l = tm_x
     tm_h = tm_l
-    tm_h%day = tm_h%day + 10
-    call norm_time(tm_h)
+    call add_day(tm_h, 10.0_DP)
     kokei_t = kokei_t + 90.0_DP
     if (int(kokei_t) == 360) kokei_t = 0.0_DP
   end do

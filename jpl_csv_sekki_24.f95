@@ -6,6 +6,7 @@
 !   2018.10.27    mk-mode.com     1.00 新規作成
 !   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
 !                                      を変更
+!   2018.11.25    mk-mode.com     1.02 日の加減算処理を変更
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 ! ---
@@ -46,8 +47,7 @@ program jpl_sekki_24
   do y = Y_MIN - 1, Y_MAX + 1
     tm_l = t_time(y, 1, 1, 0, 0, 0, 0)
     tm_h = t_time(y, 1, 1, 0, 0, 0, 0)
-    tm_h%day = tm_h%day + 29
-    call norm_time(tm_h)
+    call add_day(tm_h, 29.0_DP)
     sekki_x = 285.0_DP
     do while (tm_l%year == y)
       call bisection(tm_l, tm_h, sekki_x, tm_x)
@@ -64,8 +64,7 @@ program jpl_sekki_24
           & tm_x%hour, tm_x%minute, tm_x%second
       tm_l = tm_x
       tm_h = tm_l
-      tm_h%day = tm_h%day + 29
-      call norm_time(tm_h)
+      call add_day(tm_h, 29.0_DP)
       sekki_x = sekki_x + 15.0_DP
       if (sekki_x == 360.0_DP) sekki_x = 0.0
       if (sekki_x == 285.0_DP) exit

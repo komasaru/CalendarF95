@@ -55,7 +55,6 @@ program jpl_zassetsu
       do d = 1, days_m
         jst = t_time(y, m, d, 0, 0, 0, 0)
         call gc2jd(jst, jd)
-        jd = jd - JST_D  ! JST -> UTC
         call comp_zassetsu(jd, kokeis, sekkis, zassetsu)
         if (zassetsu(1) == 99) cycle
         write (str_z, '(I2, ",", I2)') zassetsu

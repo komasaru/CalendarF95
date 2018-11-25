@@ -46,7 +46,6 @@ program jpl_oc
   character(34), allocatable :: chus(:)      ! 中気一覧（各行は文字列として取得）
   character(34), allocatable :: sakus(:)     ! 朔一覧（各行は文字列として取得）
   character(34) :: tmp(5000)  ! 一覧（一時処理用）
-  type(t_time) :: jst
   integer(SP)  :: len_n, len_c, len_s
   integer(SP)  :: y, m, d, days_m, ios, leap
   real(DP)     :: jd
@@ -88,9 +87,6 @@ program jpl_oc
       days_m = DAYS(m)
       if (m == 2 .and. is_leap(y)) days_m = days_m + 1
       do d = 1, days_m
-        jst = t_time(y, m, d, 0, 0, 0, 0)
-        call gc2jd(jst, jd)
-        jd = jd - JST_D  ! JST -> UTC
         call calc_oc(y, m, d, nibuns, len_n, chus, len_c, sakus, len_s, oc)
         if (oc%flag_leap) then
           leap = 1

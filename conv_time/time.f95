@@ -6,6 +6,8 @@
 !   2018.11.09    mk-mode.com     1.01 時刻の取扱変更(マイクロ秒 => ミリ秒)
 !   2018.11.10    mk-mode.com     1.02 テキストファイル OPEN/READ 時のエラー処理
 !                                      を変更
+!   2018.11.25    mk-mode.com     1.03 日時の正常化処理を削除し、日の加減算処理を
+!                                      追加
 !
 ! Copyright(C) 2018 mk-mode.com All Rights Reserved.
 !*******************************************************************************
@@ -50,89 +52,19 @@ contains
     end if
   end function is_leap
 
-  ! 日時の正常化
+  ! 日の加減算
   !
-  ! :param(inout) type(t_time) dt: 年, 月, 日, 時, 分, 秒, ミリ秒
-  subroutine norm_time(dt)
+  ! :param(inout) type(t_time) gc: Gregorian Calendar
+  ! :param(in)    real(8)       d: days
+  subroutine add_day(gc, d)
     implicit none
-    type(t_time), intent(inout) :: dt
-    integer(SP) :: kbn = 0  ! 繰り上げ(1)か繰り下げ(-1)が
-    integer(SP) :: days_m   ! 月内の日数
+    type(t_time), intent(inout) :: gc
+    real(DP),     intent(in)    :: d
+    real(DP) :: jd
 
-    ! ミリ秒（繰り上げ／繰り下げ）
-    do while (dt%msecond > 999)
-      kbn = 1
-      dt%msecond = dt%msecond - 1000
-      dt%second  = dt%second + 1
-    end do
-    do while (dt%msecond < 0)
-      kbn = -1
-      dt%msecond = dt%msecond + 1000
-      dt%second  = dt%second - 1
-    end do
-    ! 秒（繰り上げ／繰り下げ）
-    do while (dt%second > 59)
-      kbn = 1
-      dt%second = dt%second - 60
-      dt%minute = dt%minute + 1
-    end do
-    do while (dt%second < 0)
-      kbn = -1
-      dt%second = dt%second + 60
-      dt%minute = dt%minute - 1
-    end do
-    ! 分（繰り上げ／繰り下げ）
-    do while (dt%minute > 59)
-      kbn = 1
-      dt%minute = dt%minute - 60
-      dt%hour   = dt%hour + 1
-    end do
-    do while (dt%minute < 0)
-      kbn = -1
-      dt%minute = dt%minute + 60
-      dt%hour   = dt%hour - 1
-    end do
-    ! 時（繰り上げ／繰り下げ）
-    do while (dt%hour > 23)
-      kbn = 1
-      dt%hour = dt%hour - 24
-      dt%day  = dt%day + 1
-    end do
-    do while (dt%hour< 0)
-      kbn = -1
-      dt%hour = dt%hour + 24
-      dt%day  = dt%day - 1
-    end do
-    ! 月内の日数
-    if (is_leap(dt%year)) then
-      if ((kbn ==  1 .and. dt%month == 2) .or. &
-          (kbn == -1 .and. dt%month == 3)) then
-        days_m = DAYS(2) + 1
-      else
-        days_m = DAYS(dt%month)
-      end if
-    else
-      days_m = DAYS(dt%month)
-    end if
-    ! 日（繰り上げ／繰り下げ）
-    do while (dt%day > days_m)
-      dt%day   = dt%day - days_m
-      dt%month = dt%month + 1
-    end do
-    do while (dt%day < 0)
-      dt%day   = dt%day + days_m
-      dt%month = dt%month - 1
-    end do
-    ! 月（繰り上げ／繰り下げ）
-    do while (dt%month> 12)
-      dt%month = dt%month - 12
-      dt%year  = dt%year + 1
-    end do
-    do while (dt%month< 0)
-      dt%month = dt%month + 12
-      dt%year  = dt%year- 1
-    end do
-  end subroutine norm_time
+    call gc2jd(gc, jd)
+    call jd2gc(jd + d, gc)
+  end subroutine add_day
 
   ! ============================
   ! Public subroutines/functions
@@ -200,17 +132,65 @@ contains
       ye= ye - 1
       mo= mo + 12
     end if
-    d =   int(365.25_DP * ye)      &
-      & + int(ye / 400.0_DP)       &
-      & - int(ye / 100.0_DP)       &
-      & + int(30.59_DP * (mo - 2)) &
-      & + da + 1721088.5
-    t =  (ms / (3600.0_DP * 1.0e3_DP) &
-      & + se / 3600.0_DP                  &
-      & + mi / 60.0_DP                    &
-      & + ho) / 24.0_DP
+    d = int(365.25_DP * ye)      &
+    & + int(ye / 400.0_DP)       &
+    & - int(ye / 100.0_DP)       &
+    & + int(30.59_DP * (mo - 2)) &
+    & + da + 1721088.5_DP
+    t = (ms / (3600.0_DP * 1.0e3_DP) &
+    & + se / 3600.0_DP               &
+    & + mi / 60.0_DP                 &
+    & + ho) / 24.0_DP
     jd = d + t
   end subroutine gc2jd
+
+  ! JD(Julian Day) -> GC(Gregoria Calendar)
+  !
+  ! :param(in)  real(8)      jd: Julian Day
+  ! :param(out) type(t_time) gc: Gregoria Calendar
+  subroutine jd2gc(jd, gc)
+    implicit none
+    real(DP),     intent(in)  :: jd
+    type(t_time), intent(out) :: gc
+    integer(SP) :: i, x(0:6), ut(0:6)
+    real(DP)    :: jd_w, tm, tm_w
+
+    ut = (/(0, i=0,6)/)
+    jd_w = jd - 0.5_DP
+    x(0) = int(jd_w + 68570.0_DP)
+    x(1) = int(x(0) / 36524.25_DP)
+    x(2) = x(0) - int(36524.25_DP * x(1) + 0.75_DP)
+    x(3) = int((x(2) + 1) / 365.2425_DP)
+    x(4) = x(2) - int(365.25_DP * x(3)) + 31
+    x(5) = int(int(x(4)) / 30.59_DP)
+    x(6) = int(int(x(5)) / 11.0_DP)
+
+    ! 年・月・日
+    ut(2) = x(4) - int(30.59_DP * x(5))
+    ut(1) = x(5) - 12 * x(6) + 2
+    ut(0) = 100 * (x(1) - 49) + x(3) + x(6)
+    ! (2月30日の補正)
+    if (ut(1) == 2 .and. ut(2) > 28) then
+      if (mod(ut(0), 100) == 0 .and. mod(ut(0), 400) == 0) then
+        ut(2) = 29
+      else if (mod(ut(0), 4) == 0) then
+        ut(2) = 29
+      else
+        ut(2) = 28
+      end if
+    end if
+
+    ! 時・分・秒・ミリ秒
+    tm = 86400.0_DP * (jd_w - int(jd_w))
+    ut(3) = int(tm / 3600.0_DP)
+    ut(4) = int((tm - 3600 * ut(3)) / 60.0_DP)
+    ! ミリ秒対応
+    !ut(5) = tm - 3600 * ut(3) - 60 * ut(4)
+    tm_w = tm - 3600 * ut(3) - 60 * ut(4)
+    ut(5) = int(tm_w)
+    ut(6) = nint((tm_w - ut(5)) * 1.0e3_DP)
+    gc = t_time(ut(0), ut(1), ut(2), ut(3), ut(4), ut(5), ut(6))
+  end subroutine jd2gc
 
   ! JD(Julian Day) -> JC(Julian Century)
   !
@@ -317,22 +297,9 @@ contains
     type(t_time), intent(in)  :: utc
     integer(SP),  intent(in)  :: utc_tai
     type(t_time), intent(out) :: tai
-    integer(SP)  :: ye, mo, da, ho, mi, se, ms
-    integer(SP)  :: days_m
-    type(t_time) :: tmp
 
-    ye = utc%year
-    mo = utc%month
-    da = utc%day
-    ho = utc%hour
-    mi = utc%minute
-    se = utc%second
-    ms = utc%msecond
-
-    se = se - utc_tai
-    tmp = t_time(ye, mo, da, ho, mi, se, ms)
-    call norm_time(tmp)
-    tai = tmp
+    tai = utc
+    call add_day(tai, real(-utc_tai, DP) / SEC_DAY)
   end subroutine utc2tai
 
   ! UTC(協定世界時) -> UT1(世界時1)
@@ -345,22 +312,9 @@ contains
     type(t_time), intent(in)  :: utc
     real(DP),     intent(in)  :: dut1
     type(t_time), intent(out) :: ut1
-    integer(SP)  :: ye, mo, da, ho, mi, se, ms
-    type(t_time) :: tmp
 
-    ye = utc%year
-    mo = utc%month
-    da = utc%day
-    ho = utc%hour
-    mi = utc%minute
-    se = utc%second
-    ms = utc%msecond
-
-    se = se + int(dut1)
-    ms = ms + nint((dut1 - int(dut1)) * 1.0e3_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, ms)
-    call norm_time(tmp)
-    ut1 = tmp
+    ut1 = utc
+    call add_day(ut1, dut1 / SEC_DAY)
   end subroutine utc2ut1
 
   ! TAI(国際原子時) -> TT(地球時)
@@ -371,22 +325,9 @@ contains
     implicit none
     type(t_time), intent(in)  :: tai
     type(t_time), intent(out) :: tt
-    integer(SP)  :: ye, mo, da, ho, mi, se, ms
-    type(t_time) :: tmp
 
-    ye = tai%year
-    mo = tai%month
-    da = tai%day
-    ho = tai%hour
-    mi = tai%minute
-    se = tai%second
-    ms = tai%msecond
-
-    se = se + int(TT_TAI)
-    ms = ms + nint((TT_TAI - int(TT_TAI)) * 1.0e3_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, ms)
-    call norm_time(tmp)
-    tt = tmp
+    tt = tai
+    call add_day(tt, TT_TAI / SEC_DAY)
   end subroutine tai2tt
 
   ! TT(地球時) -> TCG(地球重心座標時)
@@ -399,24 +340,11 @@ contains
     type(t_time), intent(in)  :: tt
     real(DP),     intent(in)  :: jd
     type(t_time), intent(out) :: tcg
-    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     real(DP)     :: s
-    type(t_time) :: tmp
-
-    ye = tt%year
-    mo = tt%month
-    da = tt%day
-    ho = tt%hour
-    mi = tt%minute
-    se = tt%second
-    ms = tt%msecond
 
     s = L_G * (jd - T_0) * SEC_DAY
-    se  = se + int(s)
-    ms = ms + nint((s - int(s)) * 1.0e3_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, ms)
-    call norm_time(tmp)
-    tcg = tmp
+    tcg = tt
+    call add_day(tcg, s / SEC_DAY)
   end subroutine tt2tcg
 
   ! TT(地球時) -> TCB(太陽系重心座標時)
@@ -429,24 +357,11 @@ contains
     type(t_time), intent(in)  :: tt
     real(8),      intent(in)  :: jd
     type(t_time), intent(out) :: tcb
-    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     real(DP)     :: s
-    type(t_time) :: tmp
-
-    ye = tt%year
-    mo = tt%month
-    da = tt%day
-    ho = tt%hour
-    mi = tt%minute
-    se = tt%second
-    ms = tt%msecond
 
     s = L_B * (jd - T_0) * SEC_DAY
-    se = se + int(s)
-    ms = ms + nint((s - int(s)) * 1.0e3_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, ms)
-    call norm_time(tmp)
-    tcb = tmp
+    tcb = tt
+    call add_day(tcb, s / SEC_DAY)
   end subroutine tt2tcb
 
   ! TCB(太陽系重心座標時) -> TDB(太陽系力学時)
@@ -459,24 +374,11 @@ contains
     type(t_time), intent(in)  :: tcb
     real(8),      intent(in)  :: jd_tcb
     type(t_time), intent(out) :: tdb
-    integer(SP)  :: ye, mo, da, ho, mi, se, ms
     real(DP)     :: s
-    type(t_time) :: tmp
-
-    ye = tcb%year
-    mo = tcb%month
-    da = tcb%day
-    ho = tcb%hour
-    mi = tcb%minute
-    se = tcb%second
-    ms = tcb%msecond
 
     s = L_B * (jd_tcb - T_0) * SEC_DAY - TDB_0
-    se = se - int(s)
-    ms = ms - nint((s - int(s)) * 1.0e3_DP)
-    tmp = t_time(ye, mo, da, ho, mi, se, ms)
-    call norm_time(tmp)
-    tdb = tmp
+    tdb = tcb
+    call add_day(tdb, -s / SEC_DAY)
   end subroutine tcb2tdb
 
   ! 日付文字列の整形
