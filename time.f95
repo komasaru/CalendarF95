@@ -211,6 +211,10 @@ contains
     tm_w = tm - 3600 * ut(3) - 60 * ut(4)
     ut(5) = int(tm_w)
     ut(6) = nint((tm_w - ut(5)) * 1.0e3_DP)
+    if (ut(6) > 999) then
+      ut(5) = ut(5) + 1
+      ut(6) = ut(6) - 1000
+    end if
     gc = t_time(ut(0), ut(1), ut(2), ut(3), ut(4), ut(5), ut(6))
   end subroutine jd2gc
 
