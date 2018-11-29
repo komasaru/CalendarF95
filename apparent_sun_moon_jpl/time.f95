@@ -149,53 +149,6 @@ contains
   !
   ! :param(in)  real(8)      jd: Julian Day
   ! :param(out) type(t_time) gc: Gregoria Calendar
-  !subroutine jd2gc(jd, gc)
-  !  implicit none
-  !  real(DP),     intent(in)  :: jd
-  !  type(t_time), intent(out) :: gc
-  !  integer(SP) :: i, x(0:6), ut(0:6)
-  !  real(DP)    :: jd_w, tm, tm_w
-
-  !  ut = (/(0, i=0,6)/)
-  !  jd_w = jd - 0.5_DP
-  !  x(0) = int(jd_w + 68570.0_DP)
-  !  x(1) = int(x(0) / 36524.25_DP)
-  !  x(2) = x(0) - int(36524.25_DP * x(1) + 0.75_DP)
-  !  x(3) = int((x(2) + 1) / 365.2425_DP)
-  !  x(4) = x(2) - int(365.25_DP * x(3)) + 31
-  !  x(5) = int(int(x(4)) / 30.59_DP)
-  !  x(6) = int(int(x(5)) / 11.0_DP)
-
-  !  ! 年・月・日
-  !  ut(2) = x(4) - int(30.59_DP * x(5))
-  !  ut(1) = x(5) - 12 * x(6) + 2
-  !  ut(0) = 100 * (x(1) - 49) + x(3) + x(6)
-  !  ! (2月30日の補正)
-  !  if (ut(1) == 2 .and. ut(2) > 28) then
-  !    if (mod(ut(0), 100) == 0 .and. mod(ut(0), 400) == 0) then
-  !      ut(2) = 29
-  !    else if (mod(ut(0), 4) == 0) then
-  !      ut(2) = 29
-  !    else
-  !      ut(2) = 28
-  !    end if
-  !  end if
-
-  !  ! 時・分・秒・ミリ秒
-  !  tm = 86400.0_DP * (jd_w - int(jd_w))
-  !  ut(3) = int(tm / 3600.0_DP)
-  !  ut(4) = int((tm - 3600 * ut(3)) / 60.0_DP)
-  !  ! ミリ秒対応
-  !  !ut(5) = tm - 3600 * ut(3) - 60 * ut(4)
-  !  tm_w = tm - 3600 * ut(3) - 60 * ut(4)
-  !  ut(5) = int(tm_w)
-  !  ut(6) = nint((tm_w - ut(5)) * 1.0e3_DP)
-  !  if (ut(6) > 999) then
-  !    ut(5) = ut(5) + 1
-  !    ut(6) = ut(6) - 1000
-  !  end if
-  !  gc = t_time(ut(0), ut(1), ut(2), ut(3), ut(4), ut(5), ut(6))
-  !end subroutine jd2gc
   subroutine jd2gc(jd, gc)
     implicit none
     real(DP),     intent(in)  :: jd
@@ -225,11 +178,18 @@ contains
     tm_w = tm_f - 3600 * tm(3) - 60 * tm(4)
     tm(5) = int(tm_w)
     tm(6) = nint((tm_w - tm(5)) * 1.0e3_DP)
-    gc = t_time(tm(0), tm(1), tm(2), tm(3), tm(4), tm(5), tm(6))
     ! ミリ秒四捨五入で 1000 になった場合
     if (tm(6) > 999) then
       tm(5) = tm(5) + 1
       tm(6) = tm(6) - 1000
+      if (tm(5) > 59) then
+        tm(4) = tm(4) + 1
+        tm(5) = tm(5) - 60
+        if (tm(4) > 59) then
+          tm(3) = tm(3) + 1
+          tm(4) = tm(4) - 60
+        end if
+      end if
     end if
     gc = t_time(tm(0), tm(1), tm(2), tm(3), tm(4), tm(5), tm(6))
   end subroutine jd2gc
