@@ -71,7 +71,7 @@ program jpl_holiday
   ! 計算
   do y = Y_MIN, Y_MAX
     if (y < 1948) cycle
-    ! 変動の祝日の日付･曜日を計算 ( 振替休日,国民の休日を除く )
+    ! 日付固定の祝日、変動の祝日の日付･曜日を計算 ( 振替休日,国民の休日を除く )
     call comp_holiday_0(y, mst_h, len_h, sekkis, hols_0)
     ! 振替休日計算
     call comp_holiday_1(y, hols_0, hols_1)
@@ -258,7 +258,7 @@ contains
       if (i == idx_0) then
         call jd2gc(jd_next, gc)
         idx = idx + 1
-        hols(idx) = t_hol(gc%year, gc%month, gc%day, 91)
+        hols(idx) = t_hol(gc%year, gc%month, gc%day, 90)
       else
         flag = .false.
         d_plus = 1
