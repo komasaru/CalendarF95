@@ -32,7 +32,7 @@ program jpl_holiday
     integer(SP)   :: kbn    = 0
     integer(SP)   :: y_s    = 0
     integer(SP)   :: y_e    = 0
-    character(30) :: h_name = ""
+    character(45) :: h_name = ""
   end type t_mst
   type :: t_hol
     integer(SP)   :: year  = 0
@@ -104,7 +104,7 @@ contains
     type(t_mst), intent(out) :: mst_h(50)
     integer(SP), intent(out) :: len_h
     integer(SP)   :: ios, i, h_id, m, d, kbn, y_s, y_e
-    character(30) :: h_name
+    character(45) :: h_name
 
     ! 祝日一覧 TXT ファイル OPEN
     open (unit   = UID_TXT_H,   &

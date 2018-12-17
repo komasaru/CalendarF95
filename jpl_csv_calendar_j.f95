@@ -57,7 +57,7 @@ program jpl_csv_calendar_j
     integer(SP) :: rokuyo   = 9        ! (六曜)
   end type t_oc
   ! 変数
-  character(30)    :: mst_h(0:99)      ! 祝日マスタ
+  character(45)    :: mst_h(0:99)      ! 祝日マスタ
   type(t_kokei)    :: kokeis(   Y_MAX - Y_MIN + 3, 12, 31)  ! 黄経（太陽、月）
   integer(SP)      :: sekkis(   Y_MAX - Y_MIN + 3, 12, 31)  ! 二十四節気
   type(t_zassetsu) :: zassetsus(Y_MAX - Y_MIN + 3, 12, 31)  ! 雑節
@@ -170,7 +170,7 @@ contains
   subroutine get_mst_holiday(mst_h)
     implicit none
     character(*), intent(out) :: mst_h(0:99)
-    character(30) :: h_name
+    character(45) :: h_name
     integer(SP)   :: ios, h_id, m, d, kbn, y_s, y_e
 
     ! 配列初期化
@@ -189,7 +189,7 @@ contains
     end if
 
     ! 祝日マスタ TXT ファイル READ
-    ! * 名称のない項目は半角スペース30個
+    ! * 名称のない項目は半角スペース45個
     do
       read (UID_TXT_H, *, iostat = ios) h_id, m, d, kbn, y_s, y_e, h_name
       if (ios < 0) then
