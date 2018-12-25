@@ -349,7 +349,7 @@ contains
     integer(SP) :: year, month, day, hour, minute, second, msecond
     real(DP)    :: y
 
-    y = utc%year + (utc%month - 0.5) / 12.0
+    y = utc%year + (utc%month - 0.5_DP) / 12.0_DP
     dt = 0.0_DP
     select case (utc%year)
     case (:-501)
