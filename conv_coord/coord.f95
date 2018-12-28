@@ -58,7 +58,7 @@ contains
     real(DP), intent(out) :: pol(3)
     real(DP) :: r, lmd, phi, d
 
-    r = sqrt(rect(1)**2 + rect(2)**2)
+    r = sqrt(sum(rect(1:2) * rect(1:2)))
     lmd = atan2(rect(2), rect(1))
     phi = atan2(rect(3), r)
     do while (lmd < 0.0_DP)
