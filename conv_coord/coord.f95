@@ -64,7 +64,7 @@ contains
     do while (lmd < 0.0_DP)
       lmd = lmd + PI * 2.0_DP
     end do
-    d = sqrt(rect(1)**2 + rect(2)**2 + rect(3)**2)
+    d = sqrt(sum(rect * rect))
     pol = (/lmd, phi, d/)
   end subroutine rect2pol
 
