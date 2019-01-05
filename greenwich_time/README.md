@@ -13,8 +13,8 @@
 実行方法
 ========
 
-`./greenwich_time [YYYYMMDDHHMMSSMMM]`
+`./greenwich_time [YYYYMMDD[HHMMSS[MMM]]]`
 
-* TT（地球時）は「年・月・日・時・分・秒・ミリ秒」を17桁で指定する。
+* TT（地球時）は「年・月・日・時・分・秒・ミリ秒」を最大17桁で指定する。
 * TT（地球時）を指定しない場合は、システム日時を TT とみなす。
 
