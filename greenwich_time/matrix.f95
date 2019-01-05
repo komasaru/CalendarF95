@@ -31,10 +31,11 @@ contains
 
     s = sin(phi)
     c = cos(phi)
-    mtx= reshape( &
-      & (/1.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, c, -s, 0.0_DP, s, c/), &
-      & (/3, 3/) &
-    )
+    mtx= reshape((/ &
+      & 1.0_DP, 0.0_DP, 0.0_DP, &
+      & 0.0_DP,      c,     -s, &
+      & 0.0_DP,      s,      c  &
+    & /), (/3, 3/))
   end subroutine mtx_x
 
   ! 回転行列生成(y軸中心)
@@ -52,10 +53,11 @@ contains
 
     s = sin(theta)
     c = cos(theta)
-    mtx = reshape( &
-      & (/c, 0.0_DP, s, 0.0_DP, 1.0_DP, 0.0_DP, -s, 0.0_DP, c/), &
-      & (/3, 3/) &
-    )
+    mtx = reshape((/ &
+      &      c, 0.0_DP,      s, &
+      & 0.0_DP, 1.0_DP, 0.0_DP, &
+      &     -s, 0.0_DP,      c  &
+    & /), (/3, 3/))
   end subroutine mtx_y
 
   ! 回転行列生成(z軸中心)
@@ -73,10 +75,11 @@ contains
 
     s = sin(psi)
     c = cos(psi)
-    mtx = reshape( &
-      & (/c, -s, 0.0_DP, s, c, 0.0_DP, 0.0_DP, 0.0_DP, 1.0_DP/), &
-      & (/3, 3/) &
-    )
+    mtx = reshape((/ &
+      &      c,     -s, 0.0_DP, &
+      &      s,      c, 0.0_DP, &
+      & 0.0_DP, 0.0_DP, 1.0_DP  &
+    & /), (/3, 3/))
   end subroutine mtx_z
 end module matrix
 
