@@ -20,7 +20,7 @@ program bpn_rotation
   use time
   use eph_bpn
   implicit none
-  real(DP)      :: crd(3)
+  real(DP)     :: crd(3)
   type(t_time) :: tt     ! 地球時
   real(DP)     :: jd, t  ! TT に対する Julian Day, Julian Century Number
   real(DP)     :: eps, dpsi, deps  ! 平均黄道傾斜角(ε)、章動(Δψ, Δε)
