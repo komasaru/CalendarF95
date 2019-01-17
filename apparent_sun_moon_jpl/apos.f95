@@ -34,10 +34,7 @@ contains
     integer(SP) :: i
     real(DP)    :: s
 
-    s = 0.0_DP
-    do i = 1, 3
-      s = s + (pos_b(i) - pos_a(i))**2.0_DP
-    end do
+    s = sum((pos_b(1:3) - pos_a(1:3)) * (pos_b(1:3) - pos_a(1:3)))
     dist = sqrt(s)
   end function distance
 
@@ -67,10 +64,10 @@ contains
     m = 0
     df = 1.0_DP
     do while (df > 1.0e-10_DP)
-      r_12 = (/(pv_1(i) - icrs_2(i, 1), i=1,3)/)
+      r_12 = pv_1(1:3) - icrs_2(1:3, 1)
       d_12 = distance(pv_1(1:3), icrs_2(1:3, 1))
       df = (C * SEC_DAY / au) * (t_2 - t_1) - d_12
-      df_wk = sum((/(r_12(i) * icrs_2(i + 3, 3), i=1,3)/))
+      df_wk = sum(r_12(1:3) * icrs_2(4:6, 3))
       df = df / ((C * SEC_DAY / (au * 1000.0_DP)) + df_wk / d_12)
       t_1 = t_1 + df
       m = m + 1
@@ -99,8 +96,8 @@ contains
     vec = (/(0.0_DP, i=1,3)/)
     w = distance(pos_a, pos_b)
     if (w == 0.0_DP) return
-    vec = (/(pos_b(i) - pos_a(i), i=1,3)/)
-    vec = (/(vec(i) / w, i=1,3)/)
+    vec = pos_b(1:3) - pos_a(1:3)
+    vec = vec(1:3) / w
   end subroutine calc_unit_vector
 
   ! 光行差の補正（方向ベクトルの Lorentz 変換）
@@ -119,13 +116,13 @@ contains
     integer(SP) :: i
     real(DP)    :: vec_v(3), g, f, vec_dd_1(3), vec_dd_2(3)
 
-    vec_v = (/(icrs_2(i) / SEC_DAY / (C / (au * 1000.0_DP)), i=1,3)/)
-    g = sum((/(vec_v(i) * vec_d(i), i=1,3)/))
+    vec_v = icrs_2(1:3) / SEC_DAY / (C / (au * 1000.0_DP))
+    g = sum(vec_v(1:3) * vec_d(1:3))
     f = sqrt(1.0_DP - sqrt(sum((/(vec_v(i) * vec_v(i), i=1,3)/))))
-    vec_dd_1 = (/(vec_d(i) * f, i=1,3)/)
-    vec_dd_2 = (/((1.0_DP + g / (1.0_DP + f)) * vec_v(i), i=1,3)/)
-    vec_dd = (/(vec_dd_1(i) + vec_dd_2(i), i=1,3)/)
-    vec_dd = (/(vec_dd(i) / (1.0_DP + g), i=1,3)/)
+    vec_dd_1 = vec_d(1:3) * f
+    vec_dd_2 = (1.0_DP + g / (1.0_DP + f)) * vec_v(1:3)
+    vec_dd = vec_dd_1(1:3) + vec_dd_2(1:3)
+    vec_dd = vec_dd(1:3) / (1.0_DP + g)
   end subroutine conv_lorentz
 
   ! ============================
@@ -258,7 +255,7 @@ contains
     call calc_unit_vector(icrs_2(1:3, 1), icrs_1(1:3, 2), v_12)
     ! === GCRS 座標系: 光行差の補正（方向ベクトルの Lorentz 変換）
     call conv_lorentz(icrs_2(4:6, 1), v_12, au, dd)
-    pos_moon = (/(dd(i) * d_e_m, i=1,3)/)
+    pos_moon = dd(1:3) * d_e_m
     ! === ユリウス世紀数、平均黄道傾斜角(ε)、章動(Δψ, Δε) 計算
     call jd2jc(jd_tdb, t)
     call calc_obliquity(t, eps)

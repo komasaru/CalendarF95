@@ -270,25 +270,21 @@ contains
     else if (t == 15) then
       if (bin%ipt(2, 13) > 0) rrd(1:6) = pv(1:6, 11)
     else
-      do i = 1, 10
-        pv_2(1:6, i) = pv(1:6, i)
-      end do
+      pv_2(1:6, 1:10) = pv(1:6, 1:10)
       if (t == 11 .or. c == 11) pv_2(1:6, 11) = pv_sun(1:6)
-      if (t == 12 .or. c == 12) pv_2(1:6, 12) = (/(0.0_DP, i=1,6)/)
+      if (t == 12 .or. c == 12) pv_2(1:6, 12) = 0.0_DP
       if (t == 13 .or. c == 13) pv_2(1:6, 13) = pv(1:6, 3)
       if (t * c == 30 .or. t + c == 13) then
-        pv_2(1:6, 3) = (/(0.0_DP, i=1,6)/)
+        pv_2(1:6, 3) = 0.0_DP
       else
         if (list(3) /= 0) then
-          pv_2(1:6, 3) = (/(pv(i, 3) - pv(i, 10) / (1.0_DP + bin%emrat), i=1,6)/)
+          pv_2(1:6, 3) = pv(1:6, 3) - pv(1:6, 10) / (1.0_DP + bin%emrat)
         end if
         if (list(10) /= 0) then
-          pv_2(1:6, 10) = (/(pv_2(i, 3) + pv(i, 10), i=1,6)/)
+          pv_2(1:6, 10) = pv_2(1:6, 3) + pv(1:6, 10)
         end if
       end if
-      do i = 1, 6
-        rrd(i) = pv_2(i, t) - pv_2(i, c)
-      end do
+      rrd(1:6) = pv_2(1:6, t) - pv_2(1:6, c)
     end if
   end subroutine calc_rrd
 end module eph_jpl

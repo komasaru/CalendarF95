@@ -15,7 +15,7 @@
 実行方法
 ========
 
-`./apparent_sun_moon_jpl [YYYYMMDDHHMMSSMMM]`
+`./apparent_sun_moon_jpl [YYYYMMDD[HHMMSS[MMM]]]`
 
 * JST（日本標準時）は「年・月・日・時・分・秒・ミリ秒」を17桁で指定する。
 * JST（日本標準時）を指定しない場合は、システム日時を JST とみなす。
