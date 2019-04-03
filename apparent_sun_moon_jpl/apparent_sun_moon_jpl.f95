@@ -93,9 +93,9 @@ program apparent_sun_moon_jpl
   print '("  = [黄経: ", F14.10, " deg, 黄緯: ", F14.10, " deg]")', &
     & apos_ec(1:2, 2) * 180.0_DP / PI
   print '(A)', "* 視黄経差：太陽 - 月"
-  print '("  = ", F14.10, " rad")', &
+  print '("  = ", F15.10, " rad")', &
     & apos_ec(1, 1) - apos_ec(1, 2)
-  print '("  = ", F14.10, " deg")', &
+  print '("  = ", F15.10, " deg")', &
     & (apos_ec(1, 1) - apos_ec(1, 2)) * 180.0 / PI
   print '(A)', "* 距離：太陽"
   print '("  = ", F12.10, " AU")', apos_ec(3, 1)
