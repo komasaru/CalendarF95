@@ -664,39 +664,39 @@ contains
 
     print '("[ ", I4, "-", I0.2, "-", I0.2, " ", &
       & I0.2, ":", I0.2, ":", I0.2, " UTC ]")', utc
-    print '("SUN    R.A. = ", F12.8, " h  (= ", A, ")")', &
+    print '("SUN    R.A. = ", F13.8, " h  (= ", A, ")")', &
         & sun_ra,   hour2hms(sun_ra)
-    print '("SUN    DEC. = ", F12.8, " ° (= ", A, ")")', &
+    print '("SUN    DEC. = ", F13.8, " ° (= ", A, ")")', &
         & sun_dec,  deg2dms(sun_dec)
-    print '("SUN   DIST. = ", F12.8, " AU")', sun_dist
-    print '("SUN     hG. = ", F12.8, " h  (= ", A, ")")', &
+    print '("SUN   DIST. = ", F13.8, " AU")', sun_dist
+    print '("SUN     hG. = ", F13.8, " h  (= ", A, ")")', &
         & sun_h,    hour2hms(sun_h)
-    print '("SUN    S.D. = ", F12.8, " ′ (= ", A, ")")', &
+    print '("SUN    S.D. = ", F13.8, " ′ (= ", A, ")")', &
         & sun_sd,   deg2dms(sun_sd / 60.0_DP)
-    print '("MOON   R.A. = ", F12.8, " h  (= ", A, ")")', &
+    print '("MOON   R.A. = ", F13.8, " h  (= ", A, ")")', &
         & moon_ra,  hour2hms(moon_ra)
-    print '("MOON   DEC. = ", F12.8, " ° (= ", A, ")")', &
+    print '("MOON   DEC. = ", F13.8, " ° (= ", A, ")")', &
         & moon_dec, deg2dms(moon_dec)
-    print '("MOON   H.P. = ", F12.8, " ° (= ", A, ")")', &
+    print '("MOON   H.P. = ", F13.8, " ° (= ", A, ")")', &
         & moon_hp,  deg2dms(moon_hp)
-    print '("MOON    hG. = ", F12.8, " h  (= ", A, ")")', &
+    print '("MOON    hG. = ", F13.8, " h  (= ", A, ")")', &
         & moon_h,   hour2hms(moon_h)
-    print '("MOON   S.D. = ", F12.8, " ′ (= ", A, ")")', &
+    print '("MOON   S.D. = ", F13.8, " ′ (= ", A, ")")', &
         & moon_sd,  deg2dms(moon_sd / 60.0_DP)
-    print '("         R  = ", F12.8, " h  (= ", A, ")")', &
+    print '("         R  = ", F13.8, " h  (= ", A, ")")', &
         & r,        hour2hms(r)
-    print '("       EPS. = ", F12.8, " ° (= ", A, ")")', &
+    print '("       EPS. = ", F13.8, " ° (= ", A, ")")', &
         & eps,      deg2dms(eps)
     print '(A)', "---"
-    print '("SUN  LAMBDA = ", F12.8, " ° (= ", A, ")")', &
+    print '("SUN  LAMBDA = ", F13.8, " ° (= ", A, ")")', &
         & sun_lmd,  deg2dms(sun_lmd)
-    print '("SUN    BETA = ", F12.8, " ° (= ", A, ")")', &
+    print '("SUN    BETA = ", F13.8, " ° (= ", A, ")")', &
         & sun_bet,  deg2dms(sun_bet)
-    print '("MOON LAMBDA = ", F12.8, " ° (= ", A, ")")', &
+    print '("MOON LAMBDA = ", F13.8, " ° (= ", A, ")")', &
         & moon_lmd, deg2dms(moon_lmd)
-    print '("MOON   BETA = ", F12.8, " ° (= ", A, ")")', &
+    print '("MOON   BETA = ", F13.8, " ° (= ", A, ")")', &
         & moon_bet, deg2dms(moon_bet)
-    print '("DIFF LAMBDA = ", F12.8, " ° (= ", A, ")")', &
+    print '("DIFF LAMBDA = ", F13.8, " ° (= ", A, ")")', &
         & lmd_s_m,  deg2dms(lmd_s_m)
   end subroutine display
 
