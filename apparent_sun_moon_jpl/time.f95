@@ -9,8 +9,10 @@
 !   2018.11.25    mk-mode.com     1.03 日時の正常化処理を削除し、日の加減算処理を
 !                                      追加
 !   2018.11.25    mk-mode.com     1.04 JD -> GC 変換アルゴリズムを変更
+!   2019.05.25    mk-mode.com     1.05 JST -> UTC 変換時のうるう年処理を修正
+!                                      JD -> GC 変換時の日時正規化（繰上・繰下）処理を修正
 !
-! Copyright(C) 2018 mk-mode.com All Rights Reserved.
+! Copyright(C) 2018-2019 mk-mode.com All Rights Reserved.
 !*******************************************************************************
 !
 module time
@@ -103,7 +105,8 @@ contains
     end if
     if (da < 1) then
       da = da + DAYS(mo)
-      if (is_leap(ye)) then
+      !if (is_leap(ye)) then
+      if (mo == 2 .and. is_leap(ye)) then
         da = da + 1
       end if
     end if
@@ -178,19 +181,9 @@ contains
     tm_w = tm_f - 3600 * tm(3) - 60 * tm(4)
     tm(5) = int(tm_w)
     tm(6) = nint((tm_w - tm(5)) * 1.0e3_DP)
-    ! ミリ秒四捨五入で 1000 になった場合
-    if (tm(6) > 999) then
-      tm(5) = tm(5) + 1
-      tm(6) = tm(6) - 1000
-      if (tm(5) > 59) then
-        tm(4) = tm(4) + 1
-        tm(5) = tm(5) - 60
-        if (tm(4) > 59) then
-          tm(3) = tm(3) + 1
-          tm(4) = tm(4) - 60
-        end if
-      end if
-    end if
+
+    ! 日時正規化
+    call norm_tm(tm)
     gc = t_time(tm(0), tm(1), tm(2), tm(3), tm(4), tm(5), tm(6))
   end subroutine jd2gc
 
@@ -321,5 +314,73 @@ contains
     write (f, FMT_DT_2) &
       & d%year, d%month, d%day, d%hour, d%minute, d%second, d%msecond
   end function date_fmt
+
+  ! 日時正規化
+  !
+  ! :param(inout) integer(4) tm
+  subroutine norm_tm(tm)
+    implicit none
+    integer(SP) :: tm(0:6), d
+
+    ! (繰り上がり)
+    do while (tm(6) > 999)
+      tm(6) = tm(6) - 1000
+      tm(5) = tm(5) + 1
+    end do
+    do while (tm(5) > 59)
+      tm(5) = tm(5) - 60
+      tm(4) = tm(4) + 1
+    end do
+    do while (tm(4) > 59)
+      tm(4) = tm(4) - 60
+      tm(3) = tm(3) + 1
+    end do
+    do while (tm(3) > 23)
+      tm(3) = tm(3) - 24
+      tm(2) = tm(2) + 1
+    end do
+    d = DAYS(tm(1))
+    if (tm(1) == 2 .and. is_leap(tm(0))) d = d + 1
+    do while (tm(2) > d)
+      tm(2) = tm(2) - d
+      tm(1) = tm(1) + 1
+      d = DAYS(tm(1))
+      if (tm(1) == 2 .and. is_leap(tm(0))) d = d + 1
+    end do
+    do while (tm(1) > 12)
+      tm(1) = tm(1) - 12
+      tm(0) = tm(0) + 1
+    end do
+
+    ! (繰り下がり)
+    do while (tm(1) < 1)
+      tm(0) = tm(0) - 1
+      tm(1) = tm(1) + 12
+    end do
+    d = DAYS(tm(1))
+    if (tm(1) == 2 .and. is_leap(tm(0))) d = d + 1
+    do while (tm(2) < 1)
+      tm(1) = tm(1) - 1
+      tm(2) = tm(2) + d
+      d = DAYS(tm(1))
+      if (tm(1) == 2 .and. is_leap(tm(0))) d = d + 1
+    end do
+    do while (tm(3) < 0)
+      tm(2) = tm(2) - 1
+      tm(3) = tm(3) + 24
+    end do
+    do while (tm(4) < 0)
+      tm(3) = tm(3) - 1
+      tm(4) = tm(4) + 60
+    end do
+    do while (tm(5) < 0)
+      tm(4) = tm(4) - 1
+      tm(5) = tm(5) + 60
+    end do
+    do while (tm(6) < 0)
+      tm(5) = tm(5) - 1
+      tm(6) = tm(6) + 1000
+    end do
+  end subroutine
 end module time
 
