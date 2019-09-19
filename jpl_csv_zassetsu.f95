@@ -5,8 +5,11 @@
 !   2018.10.28    mk-mode.com     1.00 新規作成
 !   2018.11.10    mk-mode.com     1.01 テキストファイル OPEN/READ 時のエラー処理
 !                                      を変更
+!   2019.09.19    mk-mode.com     1.02 春／秋分の日の5日前・後が「戊」となる場合に
+!                                      5日前の「戊」を「社日」とするよう変更
+!                                      （春／秋分点により近い方ではなく）
 !
-! Copyright(C) 2018 mk-mode.com All Rights Reserved.
+! Copyright(C) 2018-2019 mk-mode.com All Rights Reserved.
 ! ---
 ! 引数: なし
 ! ---
@@ -166,7 +169,10 @@ contains
     integer(SP), intent(out) :: zassetsu(2)
     type(t_time) :: gc
     integer(SP)  :: y, m, d, i
-    real(DP)     :: lmd_b5, lmd_b4, lmd_0, lmd_a1, lmd_a5, lmd_a6
+    ! ====[ 190919:UPD ]===>
+    !real(DP)     :: lmd_b5, lmd_b4, lmd_0, lmd_a1, lmd_a5, lmd_a6
+    real(DP)     :: lmd_b4, lmd_0, lmd_a1, lmd_a6
+    ! <===[ 190919:UPD ]====
     real(DP)     :: lmd_today, lmd_tomorrow
 
     zassetsu = (/99, 99/)
@@ -176,15 +182,19 @@ contains
     ! 計算対象日の翌日の太陽の黄経
     call jd2gc(jd + 1, gc)
     lmd_a1 = kokeis(y_idx(gc%year), gc%month, gc%day)
-    ! 計算対象日の5日前の太陽の黄経(社日計算用)
-    call jd2gc(jd - 5, gc)
-    lmd_b5 = kokeis(y_idx(gc%year), gc%month, gc%day)
+    ! ====[ 190919:DEL ]===>
+    !! 計算対象日の5日前の太陽の黄経(社日計算用)
+    !call jd2gc(jd - 5, gc)
+    !lmd_b5 = kokeis(y_idx(gc%year), gc%month, gc%day)
+    ! <===[ 190919:DEL ]====
     ! 計算対象日の4日前の太陽の黄経(社日計算用)
     call jd2gc(jd - 4, gc)
     lmd_b4 = kokeis(y_idx(gc%year), gc%month, gc%day)
-    ! 計算対象日の5日後の太陽の黄経(社日計算用)
-    call jd2gc(jd + 5, gc)
-    lmd_a5 = kokeis(y_idx(gc%year), gc%month, gc%day)
+    ! ====[ 190919:DEL ]===>
+    !! 計算対象日の5日後の太陽の黄経(社日計算用)
+    !call jd2gc(jd + 5, gc)
+    !lmd_a5 = kokeis(y_idx(gc%year), gc%month, gc%day)
+    ! <===[ 190919:DEL ]====
     ! 計算対象日の6日後の太陽の黄経(社日計算用)
     call jd2gc(jd + 6, gc)
     lmd_a6 = kokeis(y_idx(gc%year), gc%month, gc%day)
@@ -242,19 +252,24 @@ contains
       if (sekkis(y_idx(gc%year), gc%month, gc%day) == 0) then
         ! 春分の日の黄経(太陽)と翌日の黄経(太陽)の中間点が
         ! 0度(360度)以上なら、春分点が午前と判断
-        if ((lmd_a5 + lmd_a6 + 360.0_DP) / 2.0_DP >= 360.0_DP) then
-          call put_array(4, zassetsu)
-        end if
+        ! ====[ 190919:UPD ]===>
+        !if ((lmd_a5 + lmd_a6 + 360.0_DP) / 2.0_DP >= 360.0_DP) then
+        !  call put_array(4, zassetsu)
+        !end if
+        call put_array(4, zassetsu)
+        ! <===[ 190919:UPD ]====
       end if
-      ! [ 5日前 ]
-      call jd2gc(jd - 5, gc)
-      if (sekkis(y_idx(gc%year), gc%month, gc%day) == 0) then
-        ! 春分の日の黄経(太陽)と翌日の黄経(太陽)の中間点が
-        ! 0度(360度)未満なら、春分点が午後と判断
-        if ((lmd_b4 + lmd_b5 + 360.0_DP) / 2.0_DP < 360.0_DP) then
-          call put_array(4, zassetsu)
-        end if
-      end if
+      ! ====[ 190919:DEL ]===>
+      !! [ 5日前 ]
+      !call jd2gc(jd - 5, gc)
+      !if (sekkis(y_idx(gc%year), gc%month, gc%day) == 0) then
+      !  ! 春分の日の黄経(太陽)と翌日の黄経(太陽)の中間点が
+      !  ! 0度(360度)未満なら、春分点が午後と判断
+      !  if ((lmd_b4 + lmd_b5 + 360.0_DP) / 2.0_DP < 360.0_DP) then
+      !    call put_array(4, zassetsu)
+      !  end if
+      !end if
+      ! <===[ 190919:DEL ]====
     end if
     ! 5:土用入（春） ( 黄経(太陽) = 27度 )
     if (lmd_today /= lmd_tomorrow .and. lmd_tomorrow == 27) then
@@ -331,19 +346,24 @@ contains
       if (sekkis(y_idx(gc%year), gc%month, gc%day) == 180) then
         ! 春分の日の黄経(太陽)と翌日の黄経(太陽)の中間点が
         ! 0度(360度)以上なら、春分点が午前と判断
-        if ((lmd_a5 + lmd_a6) / 2.0_DP >= 180.0_DP) then
-          call put_array(15, zassetsu)
-        end if
+        ! ====[ 190919:UPD ]===>
+        !if ((lmd_a5 + lmd_a6) / 2.0_DP >= 180.0_DP) then
+        !  call put_array(15, zassetsu)
+        !end if
+        call put_array(15, zassetsu)
+        ! <===[ 190919:UPD ]====
       end if
-      ! [ 5日前 ]
-      call jd2gc(jd - 5, gc)
-      if (sekkis(y_idx(gc%year), gc%month, gc%day) == 180) then
-        ! 春分の日の黄経(太陽)と翌日の黄経(太陽)の中間点が
-        ! 0度(360度)未満なら、春分点が午後と判断
-        if ((lmd_b4 + lmd_b5) / 2.0_DP < 180.0_DP) then
-          call put_array(15, zassetsu)
-        end if
-      end if
+      ! ====[ 190919:DEL ]===>
+      !! [ 5日前 ]
+      !call jd2gc(jd - 5, gc)
+      !if (sekkis(y_idx(gc%year), gc%month, gc%day) == 180) then
+      !  ! 春分の日の黄経(太陽)と翌日の黄経(太陽)の中間点が
+      !  ! 0度(360度)未満なら、春分点が午後と判断
+      !  if ((lmd_b4 + lmd_b5) / 2.0_DP < 180.0_DP) then
+      !    call put_array(15, zassetsu)
+      !  end if
+      !end if
+      ! <===[ 190919:DEL ]====
     end if
     ! 16:土用入（秋） ( 黄経(太陽) = 207度 )
     if (lmd_today /= lmd_tomorrow .and. lmd_tomorrow == 207) then
