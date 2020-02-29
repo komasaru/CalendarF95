@@ -1,5 +1,4 @@
 #! /usr/local/bin/ruby
-# coding: utf-8
 #---------------------------------------------------------------------------------
 #= 配列作成
 #  * 全ての年の天測暦テキストデータを読み込み、係数ファイルを生成する（以下の8個）
@@ -12,10 +11,11 @@
 #    + R
 #    + EPS
 #
-# date          name            version
+# DATE          AUTHOR          VERSION
 # 2018.11.07    mk-mode.com     1.00 新規作成
+# 2020.02.29    mk-mode.com     1.01 月日の半角数字に対応
 #
-# Copyright(C) 2018 mk-mode.com All Rights Reserved.
+# Copyright(C) 2018-2020 mk-mode.com All Rights Reserved.
 #---------------------------------------------------------------------------------
 # 引数 : なし
 #---------------------------------------------------------------------------------
@@ -35,7 +35,8 @@ class GenCoeffsF95
     [2016, "text/na16-data.txt"],
     [2017, "text/na17-data.txt"],
     [2018, "text/na18-data.txt"],
-    [2019, "text/na19-data.txt"]
+    [2019, "text/na19-data.txt"],
+    [2020, "text/na20-data.txt"]
   ]
   F_SUN_RA   = "SUN_RA.txt"
   F_SUN_DEC  = "SUN_DEC.txt"
@@ -120,6 +121,7 @@ class GenCoeffsF95
               term = [[$1.to_i, $2.to_i], [$3.to_i, $4.to_i], [$5.to_i, $6.to_i]]
               next
             end
+            next if line =~ /月.*?日/
             cols = line.split(/\s+/)
             next unless cols[0] =~ /\d+/
             1.upto(9) { |i| ary[i - 1] << cols[i].to_f }
