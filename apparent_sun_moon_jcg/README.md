@@ -1,3 +1,9 @@
+注意
+====
+
+* **2022年（令和4年）版から、当リポジトリのメンテナンスを行わないことにしました。**  
+  **今後は、 [C++ 版](https://github.com/komasaru/ephemeris_jcg "komasaru/ephemeris_jcg: C++ source code to calculate ephemerises by JCG method.")のみをメンテナンスします。
+
 ビルド方法
 ==========
 
